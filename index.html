@@ -156,6 +156,69 @@
 </head>
 
 <body>
+  <!-- ============================================================
+       PREMIUM ROOTS LOGO WRITING LOADING SCREEN
+       ============================================================ -->
+  <div class="roots-loader-overlay" id="roots-loader" aria-hidden="true" role="presentation">
+    <div class="roots-loader-stage">
+      <svg class="roots-loader-svg" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ROOTS Logo Loading Animation">
+        <defs>
+          <mask id="roots-write-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1200" height="800">
+            <!-- Black background (hidden by default) -->
+            <rect x="0" y="0" width="1200" height="800" fill="#000000" />
+            
+            <!-- R - Main upper loop from bottom left up through top curve down to junction -->
+            <path class="roots-mask-stroke roots-stroke-r1 roots-mask-wide"
+              d="M 45,550 C 40,430 110,230 250,135 C 330,80 430,95 490,195 C 530,270 480,430 375,565" />
+            
+            <!-- R - Left diagonal down to junction -->
+            <path class="roots-mask-stroke roots-stroke-r2 roots-mask-wide"
+              d="M 245,385 L 375,565" />
+            
+            <!-- R - Tail shooting down right -->
+            <path class="roots-mask-stroke roots-stroke-r3 roots-mask-wide"
+              d="M 375,565 L 530,725" />
+            
+            <!-- R - Underline flourish extending up-right -->
+            <path class="roots-mask-stroke roots-stroke-r4"
+              d="M 375,565 L 740,460" />
+            
+            <!-- O1 - First O loop -->
+            <path class="roots-mask-stroke roots-stroke-o1 roots-mask-wide"
+              d="M 570,410 C 530,420 525,475 565,485 C 610,485 615,420 570,410 Z" />
+            
+            <!-- O2 - Second O loop -->
+            <path class="roots-mask-stroke roots-stroke-o2 roots-mask-wide"
+              d="M 655,355 C 615,365 615,420 655,425 C 700,425 705,360 655,355 Z" />
+            
+            <!-- T - Upward rising stem & downstroke -->
+            <path class="roots-mask-stroke roots-stroke-t1 roots-mask-wide"
+              d="M 625,275 L 780,125 C 765,200 745,280 735,360" />
+            
+            <!-- T - Cross bar -->
+            <path class="roots-mask-stroke roots-stroke-t2 roots-mask-wide"
+              d="M 620,290 L 770,200" />
+            
+            <!-- S - Loop and body -->
+            <path class="roots-mask-stroke roots-stroke-s roots-mask-wide"
+              d="M 760,200 C 790,140 860,115 890,145 C 925,180 920,240 885,270 C 850,300 815,320 830,345" />
+            
+            <!-- Tagline: The engine behind the brands -->
+            <g class="roots-mask-tagline">
+              <rect x="480" y="525" width="710" height="90" fill="#ffffff" />
+            </g>
+
+            <!-- Final full reveal plate ensuring 100% exact logo coverage -->
+            <rect class="roots-mask-full" x="0" y="0" width="1200" height="800" fill="#ffffff" />
+          </mask>
+        </defs>
+
+        <!-- The EXACT original ROOTS logo artwork -->
+        <image href="assets/images/roots-logo.png" x="0" y="0" width="1200" height="800" mask="url(#roots-write-mask)" preserveAspectRatio="xMidYMid meet" />
+      </svg>
+    </div>
+  </div>
+
   <!-- Accessibility Skip to Main Content Link -->
   <a href="#main-content" class="sr-only">Skip to main content</a>
 

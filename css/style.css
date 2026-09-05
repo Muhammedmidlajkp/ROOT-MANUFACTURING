@@ -1914,4 +1914,154 @@ p {
     animation: none !important;
     opacity: 0.4 !important;
   }
+
+  .roots-loader-overlay {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   23. PREMIUM ROOTS LOGO WRITING LOADING SCREEN
+   -------------------------------------------------------------------------- */
+.roots-loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-color: #060606;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.55s;
+  pointer-events: all;
+}
+
+.roots-loader-overlay.is-loaded {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.roots-loader-stage {
+  width: min(88vw, 480px);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.roots-loader-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Handwriting Mask Strokes */
+.roots-mask-stroke {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 50;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.roots-mask-wide {
+  stroke-width: 70;
+}
+
+@keyframes rootsDrawStroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes rootsTaglineFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Precise Organic Handwriting Sequence:
+   R: 0.10s – 0.75s
+   O1: 0.70s – 1.05s
+   O2: 1.00s – 1.35s
+   T:  1.25s – 1.70s
+   S:  1.65s – 2.10s
+   Tagline: 2.05s – 2.45s
+   Full Unify Fill: 2.30s
+   Hold: 2.45s – 2.90s
+   Site Transition: 2.90s – 3.45s
+*/
+
+.roots-stroke-r1 {
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: rootsDrawStroke 0.65s cubic-bezier(0.4, 0, 0.2, 1) 0.10s forwards;
+}
+
+.roots-stroke-r2 {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: rootsDrawStroke 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.35s forwards;
+}
+
+.roots-stroke-r3 {
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;
+  animation: rootsDrawStroke 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.55s forwards;
+}
+
+.roots-stroke-r4 {
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;
+  animation: rootsDrawStroke 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.60s forwards;
+}
+
+.roots-stroke-o1 {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: rootsDrawStroke 0.38s cubic-bezier(0.4, 0, 0.2, 1) 0.70s forwards;
+}
+
+.roots-stroke-o2 {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: rootsDrawStroke 0.38s cubic-bezier(0.4, 0, 0.2, 1) 1.00s forwards;
+}
+
+.roots-stroke-t1 {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: rootsDrawStroke 0.40s cubic-bezier(0.4, 0, 0.2, 1) 1.25s forwards;
+}
+
+.roots-stroke-t2 {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: rootsDrawStroke 0.30s cubic-bezier(0.4, 0, 0.2, 1) 1.50s forwards;
+}
+
+.roots-stroke-s {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: rootsDrawStroke 0.45s cubic-bezier(0.4, 0, 0.2, 1) 1.65s forwards;
+}
+
+.roots-mask-tagline {
+  opacity: 0;
+  animation: rootsTaglineFade 0.40s cubic-bezier(0.16, 1, 0.3, 1) 2.05s forwards;
+}
+
+.roots-mask-full {
+  opacity: 0;
+  animation: rootsTaglineFade 0.30s ease-out 2.30s forwards;
 }

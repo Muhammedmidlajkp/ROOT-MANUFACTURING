@@ -11,6 +11,32 @@
   const CONTACT_EMAIL = 'rootsbusinessconnect@gmail.com';
 
   // ------------------------------------------------------------------------
+  // 0a. ROOTS Signature Writing Loading Sequence
+  // ------------------------------------------------------------------------
+  function initLogoLoader() {
+    const loader = document.getElementById('roots-loader');
+    if (!loader) return;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const hideDelay = prefersReduced ? 0 : 2900;
+
+    const dismiss = () => {
+      loader.classList.add('is-loaded');
+      setTimeout(() => {
+        if (loader.parentNode) {
+          loader.parentNode.removeChild(loader);
+        }
+      }, 650);
+    };
+
+    if (prefersReduced) {
+      dismiss();
+    } else {
+      setTimeout(dismiss, hideDelay);
+    }
+  }
+
+  // ------------------------------------------------------------------------
   // 0b. Hero content recession on scroll (entrance itself is CSS-only)
   // ------------------------------------------------------------------------
   function initHeroScrollEffect() {
@@ -423,6 +449,7 @@
   // DOM Ready Initialization
   // ------------------------------------------------------------------------
   document.addEventListener('DOMContentLoaded', () => {
+    initLogoLoader();
     initHeroScrollEffect();
     initProcessSwitcher();
     initCapabilityAccordion();
