@@ -11,29 +11,35 @@
   const CONTACT_EMAIL = 'rootsbusinessconnect@gmail.com';
 
   // ------------------------------------------------------------------------
-  // 0a. ROOTS Signature Writing Loading Sequence
+  // 0a. Brand title card
+  //
+  // The card reveals, holds and clears entirely in CSS (style.css section 23)
+  // with animation-fill-mode: both, so the page is released whether or not
+  // this file runs. Previously the overlay was dismissed by a setTimeout, and
+  // a script error anywhere above this point left a fixed, opaque,
+  // pointer-events: all element over the whole site indefinitely.
+  //
+  // All that is left here is taking the finished node out of the document.
   // ------------------------------------------------------------------------
   function initLogoLoader() {
     const loader = document.getElementById('roots-loader');
     if (!loader) return;
 
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const hideDelay = prefersReduced ? 0 : 2900;
-
-    const dismiss = () => {
-      loader.classList.add('is-loaded');
-      setTimeout(() => {
-        if (loader.parentNode) {
-          loader.parentNode.removeChild(loader);
-        }
-      }, 650);
+    let done = false;
+    const drop = () => {
+      if (done) return;
+      done = true;
+      if (loader.parentNode) loader.parentNode.removeChild(loader);
     };
 
-    if (prefersReduced) {
-      dismiss();
-    } else {
-      setTimeout(dismiss, hideDelay);
-    }
+    loader.addEventListener('animationend', (e) => {
+      if (e.target === loader && e.animationName === 'rootsLoaderClear') drop();
+    });
+
+    // Belt and braces: if animationend never fires (an interrupted animation,
+    // a browser that skips it in a background tab), remove it anyway. The
+    // overlay is already invisible and inert by this point either way.
+    setTimeout(drop, 4000);
   }
 
   // ------------------------------------------------------------------------

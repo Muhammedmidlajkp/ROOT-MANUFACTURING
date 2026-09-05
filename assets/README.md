@@ -18,10 +18,38 @@ browser never needs.
 | File | Size | Used by |
 |---|---|---|
 | `images/roots-logo.png` | 50 KB | Header and footer, both pages |
-| `images/roots-hero-craftsmanship.webp` | 99 KB | Homepage hero, ≥801px |
-| `images/roots-hero-craftsmanship-mobile.webp` | 34 KB | Homepage hero, ≤800px |
-| `../favicon.svg` | 1.6 KB | Favicon, all sizes |
-| `../favicon.png` | 11 KB | Apple touch icon |
+| `images/roots-logo-mark.png` | 31 KB | Homepage loading screen only |
+| `images/roots-hero-craftsmanship.webp` | 154 KB | Homepage hero, ≥801px |
+| `images/roots-hero-craftsmanship-mobile.webp` | 75 KB | Homepage hero, ≤800px |
+| `../favicon.svg` | **629 KB** | Favicon, all sizes |
+| `../favicon.png` | **472 KB** | Apple touch icon |
+
+### `roots-logo-mark.png`
+
+The same ROOTS artwork as `roots-logo.png`, resampled from
+`masters/roots-logo-1536x1024.png` and trimmed to its ink box so CSS sizes the
+lettering itself rather than transparent canvas. Nothing about the shapes,
+proportions or colour is altered.
+
+It is an **indexed PNG**: one palette entry per alpha step, all carrying the
+artwork's single red (`rgb(248,0,6)`). Flat line art on transparency is
+dominated by its alpha plane, which WebP stores losslessly — the same image as
+an RGBA WebP is 55 KB. Indexing it costs a maximum alpha error of 2/255 and
+saves 45%. 1080px wide, which is exactly 1:1 at the loader's 540px cap on a
+2× display. If the artwork is ever re-cut, regenerate at 1080px rather than
+scaling this file.
+
+### The two favicons are 1.1 MB between them
+
+`favicon.svg` (629 KB) is a 128×128 SVG wrapping a base64 **912×713** PNG, and
+`favicon.png` (472 KB) is that same 912×713 raster. Both are fetched on first
+load, where they render at 16–180px. Together they are ~78% of the homepage's
+same-origin transfer and four times the hero photograph.
+
+They were 1.6 KB and 11 KB when this file was first written. Re-exporting at
+display resolution — 128px for the SVG payload, 180px for the apple-touch
+icon — restores roughly a megabyte on every cold visit. Left as found: these
+are client-supplied brand exports, not generated assets.
 
 **The hero photograph is flagged TEMPORARY** in `index.html` and `css/style.css`.
 It is 1376px wide, so it upscales on displays above that, and its JPEG master

@@ -1915,153 +1915,230 @@ p {
     opacity: 0.4 !important;
   }
 
-  .roots-loader-overlay {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
+  /* The loading screen's reduced-motion behaviour is defined with the rest of
+     it in section 23, where it can rely on source order rather than on
+     !important. */
 }
 
+
 /* --------------------------------------------------------------------------
-   23. PREMIUM ROOTS LOGO WRITING LOADING SCREEN
+   23. BRAND TITLE CARD (LOADING SCREEN)
+
+   The ROOTS mark is a signature, so it is revealed the way a signature is
+   made: one sweep along its own writing direction, left to right. Every
+   intermediate frame is therefore a complete left-hand portion of the mark.
+   The previous implementation traced nine hand-authored strokes through an
+   SVG mask; because those paths did not follow the raster letterforms, the
+   fully "drawn" state showed a severed t-bar and a broken s, and a full-plate
+   rectangle had to be faded in at 2.3s to repair it. A sweep cannot break
+   the artwork, and needs no repair frame.
+
+   Ground is #060606 — the same value as .hero's background-color — so the
+   clear is a cross-fade between two identical darks with no flash.
+
+   The reveal, the hold and the clear are all CSS with animation-fill-mode:
+   both. If this page's JavaScript never runs, the overlay still ends at
+   opacity 0 / visibility hidden / pointer-events none. main.js only removes
+   the finished node.
+
+     0.12 – 1.06s  mark swept in
+     0.10 – 1.40s  stage settles 1.028 -> 1
+     0.60 – 1.12s  rule draws outward from centre
+     0.80 – 1.28s  place line rises
+     1.34 – 1.80s  overlay clears
+
+   The hero's own CSS entrance runs from page render (eyebrow 0.26s through
+   meta bar 1.76s, background scale 2.4s), so the hero is still arriving as
+   this clears rather than sitting finished behind it.
    -------------------------------------------------------------------------- */
 .roots-loader-overlay {
   position: fixed;
   inset: 0;
   z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   background-color: #060606;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.55s;
-  pointer-events: all;
+  animation: rootsLoaderClear 460ms cubic-bezier(0.4, 0, 0.2, 1) 1340ms both;
 }
 
-.roots-loader-overlay.is-loaded {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+@keyframes rootsLoaderClear {
+  from {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  99% {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
 }
 
+/* One declaration sizes the whole composition: the mark, the rule beneath it
+   and the measure the place line is centred in.
+     40vw + 140px  gives phones a dominant mark and desktops a composed one
+     58vh          keeps the card inside short and landscape viewports
+     540px         caps it at the resolution of roots-logo-mark.png at 2x */
 .roots-loader-stage {
-  width: min(88vw, 480px);
-  padding: 20px;
+  width: min(76vw, 40vw + 140px, 58vh, 540px);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  animation: rootsStage 1800ms both;
 }
 
-.roots-loader-svg {
+/* One timeline for the card itself: a long settle onto its final size, then,
+   under the fade, a small lift and swell so it releases forward rather than
+   simply switching off. The hero's background is contracting from 1.025 to 1
+   through the same moment, so the two layers separate instead of sliding
+   together. Both movements are a couple of per cent — enough to feel, not
+   enough to notice. */
+@keyframes rootsStage {
+  0% {
+    transform: scale(1.028);
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  72% {
+    transform: scale(1);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.85, 1);
+  }
+
+  100% {
+    transform: scale(1.026) translateY(-10px);
+  }
+}
+
+.roots-mark-wrap {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+}
+
+.roots-mark {
   width: 100%;
   height: auto;
   display: block;
 }
 
-/* Handwriting Mask Strokes */
-.roots-mask-stroke {
-  fill: none;
-  stroke: #ffffff;
-  stroke-width: 50;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+/* Curtain in the ground colour, retreating rightwards. Its leading edge is
+   feathered and raked 7 degrees to sit with the script's italic lean, so the
+   mark resolves out of the dark rather than being uncovered by a hard line.
+
+   The -6% overhang places the opaque edge of the feather exactly on the mark's
+   left side at rest, so the sweep starts revealing on its first frame instead
+   of spending a third of a second travelling across empty ground, and the
+   travel of 90% carries the trailing edge just past the right side at 94% of
+   the run. Easing is a true in-and-out — a hand starts from rest, crosses at
+   speed and comes to rest — rather than a front-loaded ease-out that would
+   snap the mark into place and then wait. */
+.roots-mark-wipe {
+  position: absolute;
+  top: -10%;
+  left: -6%;
+  width: 118%;
+  height: 120%;
+  background: linear-gradient(97deg, rgba(6, 6, 6, 0) 0%, #060606 5%, #060606 100%);
+  animation: rootsMarkWipe 940ms cubic-bezier(0.4, 0.02, 0.28, 1) 60ms both;
 }
 
-.roots-mask-wide {
-  stroke-width: 70;
-}
+@keyframes rootsMarkWipe {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
 
-@keyframes rootsDrawStroke {
   to {
-    stroke-dashoffset: 0;
+    transform: translate3d(90%, 0, 0);
   }
 }
 
-@keyframes rootsTaglineFade {
+/* The artwork's box ends at the tip of the R's descender, so a gap measured
+   from the box reads tighter than it is. */
+.roots-loader-rule {
+  width: 100%;
+  height: 1px;
+  margin-top: clamp(26px, 3.6vw, 52px);
+  background-color: rgba(250, 249, 246, 0.2);
+  transform-origin: 50% 50%;
+  animation: rootsRuleDraw 520ms cubic-bezier(0.16, 1, 0.3, 1) 600ms both;
+}
+
+@keyframes rootsRuleDraw {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.roots-loader-place {
+  margin-top: clamp(13px, 1.6vw, 18px);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  /* 5.7:1 on #060606 */
+  color: rgba(250, 249, 246, 0.5);
+  animation: rootsPlaceRise 480ms cubic-bezier(0.16, 1, 0.3, 1) 800ms both;
+}
+
+@keyframes rootsPlaceRise {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(7px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* Precise Organic Handwriting Sequence:
-   R: 0.10s – 0.75s
-   O1: 0.70s – 1.05s
-   O2: 1.00s – 1.35s
-   T:  1.25s – 1.70s
-   S:  1.65s – 2.10s
-   Tagline: 2.05s – 2.45s
-   Full Unify Fill: 2.30s
-   Hold: 2.45s – 2.90s
-   Site Transition: 2.90s – 3.45s
-*/
-
-.roots-stroke-r1 {
-  stroke-dasharray: 1200;
-  stroke-dashoffset: 1200;
-  animation: rootsDrawStroke 0.65s cubic-bezier(0.4, 0, 0.2, 1) 0.10s forwards;
+@media (max-width: 480px) {
+  .roots-loader-place {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+  }
 }
 
-.roots-stroke-r2 {
-  stroke-dasharray: 600;
-  stroke-dashoffset: 600;
-  animation: rootsDrawStroke 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.35s forwards;
-}
+/* Reduced motion: the card still appears, but nothing travels — no sweep, no
+   settle, no rise. Only opacity changes, and the page is released in 0.82s
+   rather than 1.8s.
 
-.roots-stroke-r3 {
-  stroke-dasharray: 500;
-  stroke-dashoffset: 500;
-  animation: rootsDrawStroke 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.55s forwards;
-}
+   The blanket reset in the reduced-motion block above forces every animation
+   on the page to 0.01ms with no delay. That is correct for movement, but
+   applied here it clears this overlay within a single frame, so the card
+   appears as a black flash between the first paint and the hero. These three
+   declarations restore the timing — and only the timing — for the one element
+   that needs it. Nothing here reinstates motion, so removing the !important
+   would not make the page calmer, only make it flash. */
+@media (prefers-reduced-motion: reduce) {
+  .roots-loader-overlay {
+    animation-duration: 300ms !important;
+    animation-delay: 520ms !important;
+    animation-timing-function: linear !important;
+  }
 
-.roots-stroke-r4 {
-  stroke-dasharray: 500;
-  stroke-dashoffset: 500;
-  animation: rootsDrawStroke 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.60s forwards;
-}
+  .roots-mark-wipe {
+    display: none;
+  }
 
-.roots-stroke-o1 {
-  stroke-dasharray: 400;
-  stroke-dashoffset: 400;
-  animation: rootsDrawStroke 0.38s cubic-bezier(0.4, 0, 0.2, 1) 0.70s forwards;
-}
-
-.roots-stroke-o2 {
-  stroke-dasharray: 400;
-  stroke-dashoffset: 400;
-  animation: rootsDrawStroke 0.38s cubic-bezier(0.4, 0, 0.2, 1) 1.00s forwards;
-}
-
-.roots-stroke-t1 {
-  stroke-dasharray: 600;
-  stroke-dashoffset: 600;
-  animation: rootsDrawStroke 0.40s cubic-bezier(0.4, 0, 0.2, 1) 1.25s forwards;
-}
-
-.roots-stroke-t2 {
-  stroke-dasharray: 400;
-  stroke-dashoffset: 400;
-  animation: rootsDrawStroke 0.30s cubic-bezier(0.4, 0, 0.2, 1) 1.50s forwards;
-}
-
-.roots-stroke-s {
-  stroke-dasharray: 600;
-  stroke-dashoffset: 600;
-  animation: rootsDrawStroke 0.45s cubic-bezier(0.4, 0, 0.2, 1) 1.65s forwards;
-}
-
-.roots-mask-tagline {
-  opacity: 0;
-  animation: rootsTaglineFade 0.40s cubic-bezier(0.16, 1, 0.3, 1) 2.05s forwards;
-}
-
-.roots-mask-full {
-  opacity: 0;
-  animation: rootsTaglineFade 0.30s ease-out 2.30s forwards;
+  .roots-loader-stage,
+  .roots-loader-rule,
+  .roots-loader-place {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
 }
