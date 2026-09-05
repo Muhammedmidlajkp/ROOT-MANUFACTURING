@@ -1,0 +1,1754 @@
+/* ==========================================================================
+   ROOTS — CUSTOM MEASUREMENTS PAGE
+   Scoped to .page-measurements. Does not modify homepage styling.
+   Loads after style.css and reuses its tokens (--roots-*, --font-*, --space-*).
+   ========================================================================== */
+
+.page-measurements {
+  /* --- Page-local tokens --- */
+  --ms-paper: #f5f4f0;
+  /* warm off-white workspace ground */
+  --ms-panel: #ffffff;
+  /* drawing surface */
+  --ms-ink: #0a0a0a;
+  --ms-charcoal: #202020;
+  --ms-graphite: #6b665e;
+  /* technical line + tertiary text, 5.5:1 on paper */
+  --ms-muted: #4f4a44;
+  /* body copy, 8.0:1 on paper */
+  --ms-rule: rgba(10, 10, 10, 0.14);
+  --ms-rule-strong: rgba(10, 10, 10, 0.30);
+  --ms-field: #ffffff;
+  --ms-red: #c92f32;
+  /* 4.8:1 on paper — accents and active states */
+  --ms-red-deep: #a93435;
+  /* brand red, kept for small text where more contrast is wanted */
+  --ms-red-soft: rgba(201, 47, 50, 0.07);
+
+  --ms-gutter: clamp(20px, 5vw, 88px);
+  --ms-max: 1440px;
+
+  background-color: var(--ms-paper);
+  color: var(--ms-ink);
+  /* style.css sets `overflow-x: hidden` on body, which turns body into a
+     scroll container and silently breaks `position: sticky` for the drawing.
+     `clip` gives the same visual containment without that side effect. */
+  overflow-x: clip;
+}
+
+.page-measurements main {
+  display: block;
+}
+
+/* Scripted scrolling must clear the sticky header */
+.ms-workspace,
+.ms-review,
+.ms-result,
+.ms-diagram,
+.ms-measure {
+  scroll-margin-top: 96px;
+}
+
+/* --------------------------------------------------------------------------
+   HEADER — light surface variant of the shared ROOTS header
+   -------------------------------------------------------------------------- */
+.page-measurements .site-header.ms-header {
+  position: sticky;
+  top: 0;
+  padding: 18px var(--ms-gutter);
+  background-color: rgba(247, 245, 240, 0.94);
+  -webkit-backdrop-filter: saturate(1.2) blur(6px);
+  backdrop-filter: saturate(1.2) blur(6px);
+  color: var(--ms-ink);
+  border-bottom: 1px solid var(--ms-rule);
+}
+
+.page-measurements .site-header.ms-header.scrolled {
+  position: sticky;
+  background-color: rgba(247, 245, 240, 0.96);
+  padding: 12px var(--ms-gutter);
+  border-bottom: 1px solid var(--ms-rule-strong);
+}
+
+.page-measurements .brand-mark {
+  height: 40px;
+}
+
+.page-measurements .brand-mark img {
+  max-height: 40px;
+}
+
+.page-measurements .brand-mark:hover {
+  transform: none;
+}
+
+.page-measurements .site-header nav {
+  gap: 24px;
+  font-size: 10px;
+}
+
+.page-measurements .site-header nav a {
+  color: var(--ms-muted);
+  padding: 6px 0;
+}
+
+.page-measurements .site-header nav a:hover {
+  color: var(--ms-red);
+}
+
+.page-measurements .site-header nav a.active,
+.page-measurements .site-header nav a[aria-current="page"] {
+  color: var(--ms-ink);
+  border-bottom: 1px solid var(--ms-red);
+}
+
+.page-measurements .nav-cta.ms-back {
+  color: var(--ms-ink);
+  border-color: var(--ms-rule-strong);
+  gap: 10px;
+}
+
+.page-measurements .nav-cta.ms-back:hover {
+  background-color: var(--ms-ink);
+  border-color: var(--ms-ink);
+  color: var(--roots-white);
+}
+
+.page-measurements .nav-cta.ms-back:hover span {
+  transform: translateX(-3px);
+}
+
+.page-measurements .mobile-menu-toggle span {
+  background-color: var(--ms-ink);
+}
+
+/* --------------------------------------------------------------------------
+   SHARED PRIMITIVES
+   -------------------------------------------------------------------------- */
+.ms-eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ms-graphite);
+}
+
+.ms-dash {
+  color: var(--ms-graphite);
+}
+
+.page-measurements h1,
+.page-measurements h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  color: var(--ms-ink);
+  text-wrap: balance;
+}
+
+.page-measurements h1 em,
+.page-measurements h2 em {
+  color: var(--ms-red);
+  font-style: italic;
+}
+
+.ms-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 14px 26px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: 1px solid var(--ms-ink);
+  background: transparent;
+  color: var(--ms-ink);
+  cursor: pointer;
+  transition: background-color var(--trans-smooth), color var(--trans-smooth), border-color var(--trans-smooth);
+}
+
+.ms-btn span {
+  transition: transform var(--trans-smooth);
+}
+
+.ms-btn--primary {
+  background-color: var(--ms-ink);
+  color: var(--roots-white);
+}
+
+.ms-btn--primary:hover {
+  background-color: var(--ms-red);
+  border-color: var(--ms-red);
+}
+
+.ms-btn--primary:hover span {
+  transform: translateX(4px);
+}
+
+.ms-btn--quiet {
+  border-color: var(--ms-rule-strong);
+  color: var(--ms-muted);
+}
+
+.ms-btn--quiet:hover {
+  border-color: var(--ms-ink);
+  color: var(--ms-ink);
+}
+
+.ms-btn:focus-visible {
+  outline: 2px solid var(--ms-red);
+  outline-offset: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   ENTRANCE — CSS only, so the page is never blank if scripts fail.
+   Elements have no `opacity: 0` base state; `both` supplies the end frame.
+   -------------------------------------------------------------------------- */
+@keyframes msRise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ms-intro .ms-eyebrow {
+  animation: msRise 620ms cubic-bezier(0.16, 1, 0.3, 1) 60ms both;
+}
+
+.ms-intro h1 {
+  animation: msRise 720ms cubic-bezier(0.16, 1, 0.3, 1) 140ms both;
+}
+
+.ms-intro .ms-lede {
+  animation: msRise 680ms cubic-bezier(0.16, 1, 0.3, 1) 240ms both;
+}
+
+.ms-intro .ms-steps li:nth-child(1) {
+  animation: msRise 640ms cubic-bezier(0.16, 1, 0.3, 1) 320ms both;
+}
+
+.ms-intro .ms-steps li:nth-child(2) {
+  animation: msRise 640ms cubic-bezier(0.16, 1, 0.3, 1) 380ms both;
+}
+
+.ms-intro .ms-steps li:nth-child(3) {
+  animation: msRise 640ms cubic-bezier(0.16, 1, 0.3, 1) 440ms both;
+}
+
+.ms-transition {
+  animation: msRise 640ms cubic-bezier(0.16, 1, 0.3, 1) 500ms both;
+}
+
+.ms-pending-key {
+  display: inline-block;
+  padding: 1px 6px;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ms-graphite);
+  border: 1px solid var(--ms-rule-strong);
+  vertical-align: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   INTRODUCTION — compact editorial hero, ~40vh, no decorative imagery
+   -------------------------------------------------------------------------- */
+.ms-intro {
+  max-width: var(--ms-max);
+  margin: 0 auto;
+  padding: clamp(36px, 5vw, 76px) var(--ms-gutter) clamp(28px, 3.2vw, 48px);
+}
+
+/* Two columns on desktop so the headline no longer leaves ~950px of dead air */
+.ms-intro-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.85fr);
+  gap: clamp(28px, 4vw, 80px);
+  align-items: end;
+}
+
+.ms-intro h1 {
+  /* Deliberately smaller than the homepage hero: this is a working page */
+  position: relative;
+  font-size: clamp(2.05rem, 3.5vw, 3.35rem);
+  line-height: 0.98;
+  margin: 0 0 clamp(18px, 1.8vw, 26px);
+  /* Safety net only — the <br> sets the break. Wide enough that
+     "YOUR SPECIFICATION." never wraps to a third line. */
+  max-width: 24ch;
+  text-wrap: balance;
+}
+
+/* Dimension bracket in the margin — the same extension-line language the
+   technical drawing uses, applied to the headline. The page measures
+   garments; the hero is annotated like one. Hidden where the gutter is
+   too narrow to carry it. */
+.ms-intro h1::before {
+  content: "";
+  position: absolute;
+  left: -30px;
+  top: 0.14em;
+  bottom: 0.16em;
+  width: 8px;
+  border: 1px solid var(--ms-graphite);
+  border-right: 0;
+  opacity: 0.5;
+}
+
+.ms-lede {
+  margin: 0;
+  font-size: clamp(14.5px, 1.05vw, 16px);
+  line-height: 1.6;
+  color: var(--ms-muted);
+  max-width: 44ch;
+}
+
+/* ---- Process indicator: MEASURE → SPECIFY → REVIEW ---- */
+.ms-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.ms-steps li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 2px 14px;
+  align-items: baseline;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--ms-rule);
+}
+
+.ms-step-num {
+  grid-row: 1 / span 2;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--ms-graphite);
+  font-variant-numeric: tabular-nums;
+}
+
+.ms-step-name {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ms-ink);
+}
+
+.ms-step-desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ms-graphite);
+}
+
+/* --------------------------------------------------------------------------
+   HERO → WORKSPACE TRANSITION
+   A thin labelled rule, using the site's existing numbered-kicker language.
+   -------------------------------------------------------------------------- */
+.ms-transition {
+  max-width: var(--ms-max);
+  margin: 0 auto;
+  padding: 14px var(--ms-gutter);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px 24px;
+  border-top: 1px solid var(--ms-rule-strong);
+  border-bottom: 1px solid var(--ms-rule);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.ms-transition-label {
+  color: var(--ms-ink);
+}
+
+/* Matches the "STEP 02" / "STEP 03" eyebrows on the review and delivery
+   sections, so all three stage markers read as one system. */
+.ms-transition-label i {
+  font-style: normal;
+  color: var(--ms-graphite);
+  font-weight: 600;
+}
+
+.ms-transition-meta {
+  color: var(--ms-graphite);
+  letter-spacing: 0.14em;
+}
+
+/* --------------------------------------------------------------------------
+   WORKSPACE
+   -------------------------------------------------------------------------- */
+.ms-workspace {
+  max-width: var(--ms-max);
+  margin: 0 auto;
+  padding: clamp(24px, 2.6vw, 44px) var(--ms-gutter) clamp(56px, 7vw, 104px);
+  display: grid;
+  grid-template-columns: minmax(0, 57fr) minmax(0, 43fr);
+  gap: clamp(28px, 4vw, 72px);
+  align-items: start;
+}
+
+/* ---- Technical drawing panel ---- */
+.ms-diagram-col {
+  min-width: 0;
+  /* Fill the row height so the sticky drawing has travel room beside the
+     taller form column. With `align-items: start` alone the column would
+     collapse to the drawing's own height and sticky would never engage. */
+  align-self: stretch;
+}
+
+.ms-diagram {
+  margin: 0;
+  background-color: var(--ms-panel);
+  border: 1px solid var(--ms-rule-strong);
+  position: sticky;
+  top: clamp(72px, 8vh, 88px);
+  min-height: clamp(620px, 82vh, 800px);
+  max-height: calc(100vh - 80px);
+  max-height: calc(100dvh - 80px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ms-diagram-head {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--ms-rule-strong);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Two-line title block, the way a real drawing sheet is captioned: the field
+   name in small tracked caps, the value under it. Left reads down, right reads
+   down and aligns to the sheet edge. */
+.ms-diagram-title,
+.ms-diagram-ref {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ms-graphite);
+  line-height: 1.2;
+}
+
+.ms-diagram-title b,
+.ms-diagram-ref b {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--ms-ink);
+}
+
+.ms-diagram-ref {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.ms-diagram-stage {
+  flex: 1 1 auto;
+  min-height: clamp(500px, 68vh, 680px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(10px, 1.6vw, 22px);
+  overflow: hidden;
+}
+
+.ms-svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 1120 / 1320;
+}
+
+.ms-legend {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  padding: 8px 18px;
+  border-top: 1px solid var(--ms-rule);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ms-graphite);
+}
+
+.ms-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Enlarge control — hidden on desktop where the drawing is already large.
+   Lives in the drawing header so it is found with the drawing, not below it. */
+.ms-enlarge {
+  display: none;
+  margin-left: auto;
+  min-height: 34px;
+  padding: 8px 12px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ms-ink);
+  background: transparent;
+  border: 1px solid var(--ms-rule-strong);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.ms-enlarge:hover {
+  border-color: var(--ms-ink);
+}
+
+.ms-enlarge:focus-visible {
+  outline: 2px solid var(--ms-red);
+  outline-offset: 2px;
+}
+
+/* Full-screen inspection mode */
+.ms-diagram.is-enlarged {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  top: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ms-diagram.is-enlarged .ms-diagram-stage {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ms-diagram.is-enlarged .ms-svg {
+  width: auto;
+  height: auto;
+  min-width: 620px;
+  max-width: none;
+  max-height: 100%;
+}
+
+body.ms-locked {
+  overflow: hidden;
+}
+
+.ms-key {
+  width: 22px;
+  height: 0;
+  border-top: 1.5px solid var(--ms-charcoal);
+  display: inline-block;
+}
+
+.ms-key--dim {
+  border-top: 1px dashed var(--ms-graphite);
+}
+
+.ms-key--active {
+  border-top: 2px solid var(--ms-red);
+}
+
+/* ---- SVG technical drawing ---- */
+/* --------------------------------------------------------------------------
+   DRAWING REVEAL — the sheet is marked up in the order a draughtsman works:
+   garment first, then the dimensions, then the annotation, then the key.
+
+   CSS only, ~1040ms end to end, and the drawing is interactive throughout.
+   Nothing carries an `opacity: 0` base state, so if animations never run the
+   complete drawing is still there; the reduced-motion block above resets both
+   duration and delay so it appears at once.
+   -------------------------------------------------------------------------- */
+@keyframes msDraw {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes msAnnotate {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ms-garment {
+  animation: msDraw 420ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
+}
+
+.ms-dims .ms-dimline,
+.ms-dims .ms-ext,
+.ms-dims .ms-leader {
+  animation: msDraw 380ms cubic-bezier(0.16, 1, 0.3, 1) 380ms both;
+}
+
+.ms-label {
+  animation: msAnnotate 340ms cubic-bezier(0.16, 1, 0.3, 1) 560ms both;
+}
+
+.ms-legend {
+  animation: msDraw 320ms cubic-bezier(0.16, 1, 0.3, 1) 720ms both;
+}
+
+/* --------------------------------------------------------------------------
+   LINE HIERARCHY
+
+   Every stroke uses vector-effect: non-scaling-stroke, so weights are stated in
+   screen pixels and stay constant at every viewport. Previously they were in
+   user units and scaled with the drawing: at 390px the outline rendered at
+   0.94px and the extension lines at 0.29px, so all four levels collapsed into
+   one indistinguishable hairline and the garment lost its silhouette.
+
+   Four deliberate levels:
+     outline   2.4px  — garment silhouette, the strongest line
+     seam      1.3px  — construction
+     detail    1.1px  — buttons and small parts
+     dimension 1.1px  — measurement indicators
+     extension 0.8px  — reference and leader lines, the lightest
+   -------------------------------------------------------------------------- */
+/* Target the classes directly: the outline and seam paths live inside <defs>
+   and are drawn through <use>, so a descendant selector rooted at .ms-garment
+   never reaches them. */
+.ms-outline,
+.ms-seam,
+.ms-detail,
+.ms-dimline,
+.ms-ext,
+.ms-leader,
+.ms-hit {
+  vector-effect: non-scaling-stroke;
+}
+
+.ms-outline {
+  fill: none;
+  stroke: var(--ms-charcoal);
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.ms-seam {
+  fill: none;
+  stroke: var(--ms-charcoal);
+  stroke-width: 1.3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.ms-seam--faint {
+  stroke: var(--ms-graphite);
+  stroke-width: 0.9;
+}
+
+.ms-detail {
+  fill: none;
+  stroke: var(--ms-graphite);
+  stroke-width: 1.1;
+}
+
+/* Measurement indicators */
+.ms-dim {
+  cursor: pointer;
+}
+
+/* Touch/pointer target. In user units this was 34 units, which rendered as a
+   10px target at phone scale; in screen pixels it stays generous everywhere. */
+.ms-hit {
+  stroke: transparent;
+  stroke-width: 30;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.ms-dimline {
+  fill: none;
+  stroke: var(--ms-graphite);
+  stroke-width: 1.1;
+  vector-effect: non-scaling-stroke;
+  transition: stroke var(--trans-fast), stroke-width var(--trans-fast);
+}
+
+.ms-ext,
+.ms-leader {
+  stroke: var(--ms-graphite);
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
+  transition: stroke var(--trans-fast);
+}
+
+/* Two knockouts working together. The plates in the SVG are sized for the 19px
+   label and clear the whole word including the gaps between words, which a
+   per-glyph stroke cannot do. The stroke on the label itself then covers the
+   leader lines that approach from outside the plate. On phones the label grows
+   to 30px and outgrows the fixed plates, so there the stroke works alone. */
+.ms-labelbox {
+  fill: var(--ms-panel);
+  stroke: none;
+}
+
+.ms-label {
+  font-family: var(--font-sans);
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-anchor: middle;
+  fill: var(--ms-graphite);
+  paint-order: stroke;
+  stroke: var(--ms-panel);
+  stroke-width: 10;
+  stroke-linejoin: round;
+  transition: fill var(--trans-fast), font-weight var(--trans-fast);
+}
+
+/* Active / hover state — colour PLUS weight and an underline, never colour alone */
+/* Hover: a quieter step than activation, so the two states stay distinct. */
+.ms-dim:hover .ms-dimline {
+  stroke: var(--ms-charcoal);
+  stroke-width: 1.7;
+}
+
+.ms-dim.is-active .ms-dimline {
+  stroke: var(--ms-red);
+  stroke-width: 2.2;
+}
+
+.ms-dim:hover .ms-ext,
+.ms-dim:hover .ms-leader {
+  stroke: var(--ms-charcoal);
+}
+
+.ms-dim.is-active .ms-ext,
+.ms-dim.is-active .ms-leader {
+  stroke: var(--ms-red);
+  /* Extension lines mark exactly where a measurement starts and ends, so they
+     firm up on activation — the endpoint emphasis the drawing was missing. */
+  stroke-width: 1.4;
+}
+
+.ms-dim:hover .ms-label {
+  fill: var(--ms-charcoal);
+}
+
+.ms-dim.is-active .ms-label {
+  fill: var(--ms-red);
+  font-weight: 600;
+}
+
+/* One settle on activation, never a loop: the line firms up and stays put. */
+@keyframes msDimSettle {
+  from {
+    stroke-width: 3.4;
+    stroke-opacity: 0.55;
+  }
+
+  to {
+    stroke-width: 2.2;
+    stroke-opacity: 1;
+  }
+}
+
+.ms-dim.is-active .ms-dimline {
+  animation: msDimSettle 260ms cubic-bezier(0.16, 1, 0.3, 1) 1;
+}
+
+.ms-dim:focus {
+  outline: none;
+}
+
+.ms-dim:focus-visible .ms-labelbox {
+  stroke: var(--ms-red);
+  stroke-width: 2;
+}
+
+.ms-dim.is-filled .ms-dimline {
+  stroke-dasharray: none;
+}
+
+/* --------------------------------------------------------------------------
+   FORM
+   -------------------------------------------------------------------------- */
+.ms-form-col {
+  min-width: 0;
+}
+
+.ms-form-note {
+  margin: 0 0 28px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ms-muted);
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--ms-rule);
+}
+
+.ms-form-note abbr {
+  color: var(--ms-red);
+  text-decoration: none;
+  border: 0;
+}
+
+.ms-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 40px;
+}
+
+.ms-fieldset legend {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  width: 100%;
+  padding: 0 0 14px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--ms-rule-strong);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ms-ink);
+}
+
+.ms-legend-num {
+  font-size: 10px;
+  color: var(--ms-graphite);
+  letter-spacing: 0.1em;
+}
+
+.ms-field {
+  margin-bottom: 22px;
+}
+
+.ms-field:last-child {
+  margin-bottom: 0;
+}
+
+.ms-field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0 20px;
+}
+
+.ms-field label,
+.ms-field-label {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ms-muted);
+}
+
+.ms-field abbr {
+  color: var(--ms-red);
+  text-decoration: none;
+  border: 0;
+  margin-left: 2px;
+}
+
+.ms-field input[type="text"],
+.ms-field input[type="email"],
+.ms-field input[type="number"],
+.ms-field select,
+.ms-field textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--ms-ink);
+  background-color: var(--ms-field);
+  border: 1px solid var(--ms-rule-strong);
+  border-radius: 0;
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.ms-field textarea {
+  min-height: 96px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.ms-field select {
+  background-image: linear-gradient(45deg, transparent 50%, var(--ms-graphite) 50%),
+    linear-gradient(135deg, var(--ms-graphite) 50%, transparent 50%);
+  background-position: calc(100% - 20px) calc(50% + 2px), calc(100% - 14px) calc(50% + 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 40px;
+}
+
+.ms-field input::placeholder,
+.ms-field textarea::placeholder {
+  color: #9b958c;
+}
+
+.ms-field input:focus,
+.ms-field select:focus,
+.ms-field textarea:focus {
+  outline: none;
+  border-color: var(--ms-ink);
+  box-shadow: inset 0 -2px 0 0 var(--ms-red);
+}
+
+.ms-field input:focus-visible,
+.ms-field select:focus-visible,
+.ms-field textarea:focus-visible {
+  outline: 2px solid var(--ms-red);
+  outline-offset: 2px;
+}
+
+.ms-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ms-graphite);
+}
+
+.ms-error {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--ms-red);
+}
+
+.ms-error::before {
+  content: "▲ ";
+  font-size: 9px;
+  vertical-align: 1px;
+}
+
+.ms-field.has-error input,
+.ms-field.has-error select {
+  border-color: var(--ms-red);
+  background-color: var(--ms-red-soft);
+}
+
+/* Unit toggle */
+.ms-unit-toggle {
+  display: inline-flex;
+  border: 1px solid var(--ms-rule-strong);
+}
+
+.ms-unit-option {
+  margin: 0;
+}
+
+.ms-unit-option span {
+  display: block;
+  min-height: 44px;
+  padding: 13px 18px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ms-muted);
+  background-color: var(--ms-field);
+  cursor: pointer;
+  transition: background-color var(--trans-fast), color var(--trans-fast);
+}
+
+.ms-unit-option+.ms-unit-option span {
+  border-left: 1px solid var(--ms-rule-strong);
+}
+
+.ms-unit-option input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.ms-unit-option input:checked+span {
+  background-color: var(--ms-ink);
+  color: var(--roots-white);
+}
+
+.ms-unit-option input:focus-visible+span {
+  outline: 2px solid var(--ms-red);
+  outline-offset: 2px;
+}
+
+/* Measurement rows: LABEL / INPUT / UNIT */
+.ms-measure {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px;
+  gap: 8px 16px;
+  align-items: center;
+  padding: 14px 0 14px 14px;
+  margin-left: -14px;
+  border-bottom: 1px solid var(--ms-rule);
+  border-left: 2px solid transparent;
+  transition: border-left-color var(--trans-fast), background-color var(--trans-fast);
+}
+
+.ms-measure:last-child {
+  border-bottom: 0;
+}
+
+.ms-measure.is-active {
+  border-left-color: var(--ms-red);
+  background-color: var(--ms-red-soft);
+}
+
+.ms-measure-label {
+  display: block;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ms-ink);
+}
+
+/* The required marker is built in JS as an <abbr title>, which browsers
+   underline by default. Match the reset already applied to .ms-field. */
+.ms-measure-label abbr {
+  color: var(--ms-red);
+  text-decoration: none;
+  border: 0;
+}
+
+.ms-measure.is-active .ms-measure-label {
+  font-weight: 600;
+  color: var(--ms-red);
+}
+
+.ms-measure-desc {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ms-graphite);
+}
+
+.ms-measure-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--ms-rule-strong);
+  background-color: var(--ms-field);
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.ms-measure-input input {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 11px 4px 11px 14px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ms-ink);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.ms-measure-input input::-webkit-outer-spin-button,
+.ms-measure-input input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.ms-measure-input input:focus {
+  outline: none;
+}
+
+.ms-measure-input:focus-within {
+  border-color: var(--ms-ink);
+  box-shadow: inset 0 -2px 0 0 var(--ms-red);
+}
+
+.ms-measure-unit {
+  padding: 0 14px 0 4px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--ms-graphite);
+  flex-shrink: 0;
+}
+
+.ms-measure-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--ms-graphite);
+  border: 1px solid var(--ms-rule-strong);
+  vertical-align: 1.5px;
+}
+
+.ms-measure .ms-error {
+  grid-column: 1 / -1;
+}
+
+.ms-measure.has-error {
+  border-left-color: var(--ms-red);
+}
+
+.ms-measure.has-error .ms-measure-input {
+  border-color: var(--ms-red);
+  background-color: var(--ms-red-soft);
+}
+
+.ms-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  padding-top: 8px;
+}
+
+.ms-form-status {
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ms-muted);
+  min-height: 1px;
+}
+
+.ms-form-status.is-error {
+  color: var(--ms-red);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   REVIEW
+   -------------------------------------------------------------------------- */
+.ms-review,
+.ms-result {
+  border-top: 1px solid var(--ms-rule-strong);
+  background-color: var(--ms-panel);
+}
+
+.ms-review-inner,
+.ms-result-inner {
+  max-width: var(--ms-max);
+  margin: 0 auto;
+  padding: clamp(48px, 6vw, 88px) var(--ms-gutter);
+}
+
+.ms-review h2,
+.ms-result h2 {
+  font-size: clamp(2.2rem, 4.4vw, 3.4rem);
+  margin: 0 0 16px;
+}
+
+.ms-review-lede {
+  margin: 0 0 clamp(28px, 3vw, 44px);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ms-muted);
+  max-width: 52ch;
+}
+
+.ms-review-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(24px, 3vw, 56px);
+  margin-bottom: clamp(32px, 4vw, 52px);
+}
+
+.ms-review-group h3 {
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ms-rule-strong);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ms-ink);
+}
+
+.ms-review-group dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0;
+}
+
+.ms-review-group dt,
+.ms-review-group dd {
+  margin: 0;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ms-rule);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.ms-review-group dt {
+  color: var(--ms-muted);
+  padding-right: 16px;
+}
+
+.ms-review-group dd {
+  text-align: right;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ms-ink);
+  white-space: nowrap;
+}
+
+.ms-review-group dd.is-empty {
+  color: var(--ms-graphite);
+  font-weight: 400;
+  font-style: italic;
+}
+
+.ms-review-actions,
+.ms-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+
+/* --------------------------------------------------------------------------
+   RESULT / DELIVERY
+   -------------------------------------------------------------------------- */
+.ms-result-note {
+  max-width: 62ch;
+  margin: 0 0 24px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ms-muted);
+}
+
+.ms-callout {
+  border: 1px solid var(--ms-rule-strong);
+  border-left: 3px solid var(--ms-red);
+  padding: 20px 24px;
+  margin: 0 0 28px;
+  background-color: var(--ms-paper);
+  max-width: 72ch;
+}
+
+.ms-callout h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ms-red);
+}
+
+.ms-callout p {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ms-muted);
+}
+
+.ms-callout p:last-child {
+  margin-bottom: 0;
+}
+
+.ms-callout code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  background-color: rgba(13, 12, 11, 0.06);
+  padding: 1px 5px;
+}
+
+.ms-ref {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  margin: 0 0 28px;
+  padding: 16px 20px;
+  border: 1px solid var(--ms-rule-strong);
+  background-color: var(--ms-paper);
+  max-width: 72ch;
+}
+
+.ms-ref span {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ms-graphite);
+}
+
+.ms-ref strong {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  color: var(--ms-ink);
+}
+
+.ms-delivery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 0 0 28px;
+}
+
+/* --------------------------------------------------------------------------
+   GUIDANCE
+   -------------------------------------------------------------------------- */
+.ms-guidance {
+  max-width: var(--ms-max);
+  margin: 0 auto;
+  padding: clamp(56px, 7vw, 104px) var(--ms-gutter);
+  border-top: 1px solid var(--ms-rule);
+}
+
+.ms-guidance-head h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0 0 clamp(32px, 4vw, 56px);
+}
+
+.ms-guidance-list {
+  list-style: none;
+  margin: 0 0 clamp(32px, 4vw, 48px);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(24px, 3vw, 48px);
+}
+
+.ms-guidance-list li {
+  border-top: 1px solid var(--ms-rule-strong);
+  padding-top: 18px;
+}
+
+.ms-guidance-num {
+  display: block;
+  margin-bottom: 12px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--ms-graphite);
+}
+
+.ms-guidance-list h3 {
+  margin: 0 0 10px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ms-ink);
+}
+
+.ms-guidance-list p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--ms-muted);
+}
+
+.ms-guidance-note {
+  /* `ch` is the width of the "0" glyph, which in DM Sans is wider than the
+     average character advance, so 78ch was rendering ~99 characters per line.
+     64ch lands near 80, inside a comfortable measure. */
+  max-width: 64ch;
+  margin: 0;
+  padding: 18px 22px;
+  border: 1px solid var(--ms-rule-strong);
+  background-color: var(--ms-panel);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ms-muted);
+}
+
+.ms-guidance-note strong {
+  color: var(--ms-red);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.ms-guidance-note code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  background-color: rgba(13, 12, 11, 0.06);
+  padding: 1px 5px;
+}
+
+/* --------------------------------------------------------------------------
+   FOOTER on the light page — keep the shared dark footer
+   -------------------------------------------------------------------------- */
+.page-measurements .footer {
+  border-top: 1px solid var(--ms-rule-strong);
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE
+   -------------------------------------------------------------------------- */
+
+/* Tablet landscape / small laptop — keep two columns but rebalance */
+@media (max-width: 1180px) {
+  .ms-workspace {
+    grid-template-columns: minmax(0, 54fr) minmax(0, 46fr);
+    gap: 32px;
+  }
+
+  .ms-measure {
+    grid-template-columns: minmax(0, 1fr) 118px;
+  }
+}
+
+/* Tablet portrait and below — stack, drawing first */
+@media (max-width: 1024px) {
+  .ms-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+
+  .ms-diagram {
+    position: static;
+    min-height: auto;
+    max-height: none;
+  }
+
+  .ms-diagram-stage {
+    min-height: 480px;
+    max-height: none;
+  }
+
+  .ms-form-col {
+    max-width: 720px;
+  }
+}
+
+/* The hero keeps two columns down to 900px — it is more compact that way */
+@media (max-width: 900px) {
+  .ms-intro-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* Steps become a horizontal strip so the hero stays short when stacked */
+  .ms-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-bottom: 1px solid var(--ms-rule);
+  }
+
+  .ms-steps li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    padding: 14px 18px 14px 0;
+    border-bottom: 0;
+  }
+
+  .ms-step-num {
+    grid-row: auto;
+  }
+
+  .ms-steps li:first-child {
+    border-top: 0;
+  }
+
+  /* The gutter narrows below 900px; keep the bracket only where it fits */
+  .ms-intro h1::before {
+    left: -22px;
+    width: 6px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .ms-intro h1::before {
+    left: -20px;
+    width: 6px;
+  }
+}
+
+@media (max-width: 800px) {
+  .page-measurements .site-header nav {
+    display: none;
+  }
+
+  .page-measurements .nav-cta.ms-back {
+    font-size: 9px;
+    padding: 10px 14px;
+  }
+
+  /* ---- Mobile hero: intentionally compact, drawing reachable quickly ---- */
+  .ms-intro {
+    padding: 28px var(--ms-gutter) 24px;
+  }
+
+  .ms-intro h1 {
+    font-size: clamp(1.7rem, 8.4vw, 2.5rem);
+    margin-bottom: 16px;
+    max-width: 100%;
+  }
+
+  /* No room in the gutter for the dimension bracket on phones */
+  .ms-intro h1::before {
+    display: none;
+  }
+
+  .ms-lede {
+    font-size: 14.5px;
+    line-height: 1.55;
+    max-width: 100%;
+  }
+
+  .ms-intro-grid {
+    gap: 22px;
+  }
+
+  /* The eyebrow wrapped to three lines on every phone; keep it to one */
+  .ms-eyebrow {
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    flex-wrap: nowrap;
+  }
+
+  .ms-eyebrow .ms-dash,
+  .ms-eyebrow-sub {
+    display: none;
+  }
+
+  /* Three steps side by side, numbers and names only */
+  .ms-steps li {
+    padding: 12px 10px 12px 0;
+  }
+
+  .ms-step-desc {
+    display: none;
+  }
+
+  .ms-transition {
+    padding: 12px var(--ms-gutter);
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+  }
+
+  .ms-transition-meta {
+    display: none;
+  }
+
+  .ms-diagram-stage {
+    /* The drawing now fits, so no horizontal scrolling is needed; keeping the
+       container scrollable is harmless insurance at very narrow widths. */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    /* Was 480px, which left ~95px of empty stage around a 386px drawing and
+       pushed the form further down the phone. */
+    min-height: 0;
+    padding-block: 8px;
+  }
+
+  .ms-svg {
+    /* The drawing used to be forced to 520px inside a ~328px stage, so 172px
+       was always hidden: the left sleeve was cut off and the BICEP, CUFF and
+       SLEEVE LENGTH labels sat entirely in the hidden strip. That broke this
+       page's central promise that every measurement maps to a point on the
+       garment. The whole flat now fits, and the labels below are enlarged to
+       stay legible at that scale. ENLARGE remains for close inspection. */
+    min-width: 0;
+  }
+
+  /* Smaller drawing scale on phones, so the labels need more user units to
+     land at a comparable ~11px on screen. At that size they outgrow the fixed
+     knockout plates, so the plates go and the stroke carries the clearance. */
+  .ms-labelbox {
+    display: none;
+  }
+
+  .ms-label {
+    font-size: 30px;
+    stroke-width: 22;
+  }
+
+  .ms-enlarge {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .ms-diagram-head {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ms-diagram-ref {
+    display: none;
+  }
+
+  .ms-measure {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    padding: 16px 0 16px 14px;
+  }
+
+  .ms-measure-input {
+    grid-row: auto;
+    grid-column: 1;
+    max-width: 200px;
+  }
+
+  .ms-measure-desc {
+    grid-row: auto;
+  }
+
+  .ms-review-group dl {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .page-measurements .nav-cta.ms-back {
+    letter-spacing: 0.1em;
+  }
+
+  .ms-diagram-head {
+    padding: 12px 14px;
+  }
+
+  .ms-legend {
+    padding: 12px 14px;
+    font-size: 10px;
+  }
+
+  .ms-btn {
+    width: 100%;
+  }
+
+  .ms-form-actions,
+  .ms-review-actions,
+  .ms-result-actions,
+  .ms-delivery {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ms-unit-toggle {
+    width: 100%;
+  }
+
+  .ms-unit-option {
+    flex: 1;
+  }
+
+  .ms-unit-option span {
+    text-align: center;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+
+  .page-measurements *,
+  .page-measurements *::before,
+  .page-measurements *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    /* Without this a staged reveal keeps its elements hidden for the length of
+       their delay even though the animation itself is instant. */
+    animation-delay: 0s !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   PRINT — the specification sheet should print cleanly
+   -------------------------------------------------------------------------- */
+@media print {
+
+  .page-measurements .site-header,
+  .page-measurements .footer,
+  .ms-form-actions,
+  .ms-review-actions,
+  .ms-result-actions,
+  .ms-delivery,
+  .mobile-nav-drawer {
+    display: none !important;
+  }
+
+  .page-measurements {
+    background: #fff;
+  }
+
+  .ms-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ms-diagram {
+    position: static;
+    break-inside: avoid;
+  }
+}

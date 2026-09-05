@@ -1,0 +1,36 @@
+<!--
+  ROOTS favicon — vector "R" monogram, ~2KB, no embedded raster.
+
+  Why a monogram and not the wordmark: rendered at 16px, the browser-tab size,
+  the "Roots" script collapses into an unreadable smudge and its white badge
+  reads as a blank block on dark browser chrome. A single letterform survives
+  16px. The long diagonal leg echoes the sweeping stroke in the ROOTS wordmark,
+  and the dark badge matches the site's ink ground rather than fighting it.
+
+  Badge geometry, radius, palette and red border match favicon.svg.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1e1e" />
+      <stop offset="100%" stop-color="#0a0a0a" />
+    </linearGradient>
+    <linearGradient id="mark" x1="10%" y1="0%" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="#e8434a" />
+      <stop offset="100%" stop-color="#c92f32" />
+    </linearGradient>
+  </defs>
+
+  <rect width="128" height="128" rx="26" fill="url(#bg)" />
+  <rect x="2" y="2" width="124" height="124" rx="24" fill="none" stroke="#c92f32" stroke-width="3"
+    stroke-opacity="0.55" />
+
+  <g fill="none" stroke="url(#mark)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Stem -->
+    <path d="M 42 32 L 42 96" />
+    <!-- Bowl: kept generously open so it does not fill in at 16px -->
+    <path d="M 42 32 L 70 32 C 89 32 89 64 70 64 L 42 64" />
+    <!-- Long sweeping leg — the ROOTS wordmark's signature diagonal -->
+    <path d="M 62 62 L 98 102" />
+  </g>
+</svg>
