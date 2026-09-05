@@ -500,7 +500,7 @@
   height: auto;
   max-width: 100%;
   max-height: 100%;
-  aspect-ratio: 1120 / 1320;
+  aspect-ratio: 1140 / 1090;
 }
 
 .ms-legend {
@@ -737,23 +737,26 @@ body.ms-locked {
 /* Two knockouts working together. The plates in the SVG are sized for the 19px
    label and clear the whole word including the gaps between words, which a
    per-glyph stroke cannot do. The stroke on the label itself then covers the
-   leader lines that approach from outside the plate. On phones the label grows
-   to 30px and outgrows the fixed plates, so there the stroke works alone. */
+/* Two knockouts working together. The plates in the SVG clear the whole word
+   including the gaps between words. The stroke on the label itself covers any
+   approaching leader/extension lines. */
 .ms-labelbox {
   fill: var(--ms-panel);
   stroke: none;
+  transition: stroke var(--trans-fast);
 }
 
 .ms-label {
   font-family: var(--font-sans);
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-anchor: middle;
+  dominant-baseline: central;
   fill: var(--ms-graphite);
   paint-order: stroke;
   stroke: var(--ms-panel);
-  stroke-width: 10;
+  stroke-width: 6;
   stroke-linejoin: round;
   transition: fill var(--trans-fast), font-weight var(--trans-fast);
 }
@@ -789,7 +792,12 @@ body.ms-locked {
 
 .ms-dim.is-active .ms-label {
   fill: var(--ms-red);
-  font-weight: 600;
+  font-weight: 700;
+}
+
+.ms-dim.is-active .ms-labelbox {
+  stroke: var(--ms-red);
+  stroke-width: 1.2;
 }
 
 /* One settle on activation, never a loop: the line firms up and stays put. */
@@ -1541,13 +1549,14 @@ body.ms-locked {
 
   /* ---- Mobile hero: intentionally compact, drawing reachable quickly ---- */
   .ms-intro {
-    padding: 28px var(--ms-gutter) 24px;
+    padding: 22px var(--ms-gutter) 16px;
   }
 
   .ms-intro h1 {
-    font-size: clamp(1.7rem, 8.4vw, 2.5rem);
-    margin-bottom: 16px;
+    font-size: clamp(1.55rem, 7vw, 2.2rem);
+    margin-bottom: 10px;
     max-width: 100%;
+    line-height: 1.1;
   }
 
   /* No room in the gutter for the dimension bracket on phones */
@@ -1556,20 +1565,20 @@ body.ms-locked {
   }
 
   .ms-lede {
-    font-size: 14.5px;
-    line-height: 1.55;
+    font-size: 13.5px;
+    line-height: 1.5;
     max-width: 100%;
   }
 
   .ms-intro-grid {
-    gap: 22px;
+    gap: 16px;
   }
 
   /* The eyebrow wrapped to three lines on every phone; keep it to one */
   .ms-eyebrow {
     gap: 8px;
-    margin-bottom: 14px;
-    font-size: 10px;
+    margin-bottom: 10px;
+    font-size: 9.5px;
     letter-spacing: 0.16em;
     flex-wrap: nowrap;
   }
@@ -1581,7 +1590,7 @@ body.ms-locked {
 
   /* Three steps side by side, numbers and names only */
   .ms-steps li {
-    padding: 12px 10px 12px 0;
+    padding: 10px 8px 10px 0;
   }
 
   .ms-step-desc {
@@ -1589,8 +1598,8 @@ body.ms-locked {
   }
 
   .ms-transition {
-    padding: 12px var(--ms-gutter);
-    font-size: 9.5px;
+    padding: 10px var(--ms-gutter);
+    font-size: 9px;
     letter-spacing: 0.14em;
   }
 
@@ -1599,37 +1608,27 @@ body.ms-locked {
   }
 
   .ms-diagram-stage {
-    /* The drawing now fits, so no horizontal scrolling is needed; keeping the
-       container scrollable is harmless insurance at very narrow widths. */
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
-    /* Was 480px, which left ~95px of empty stage around a 386px drawing and
-       pushed the form further down the phone. */
     min-height: 0;
-    padding-block: 8px;
+    padding: 12px 6px;
   }
 
   .ms-svg {
-    /* The drawing used to be forced to 520px inside a ~328px stage, so 172px
-       was always hidden: the left sleeve was cut off and the BICEP, CUFF and
-       SLEEVE LENGTH labels sat entirely in the hidden strip. That broke this
-       page's central promise that every measurement maps to a point on the
-       garment. The whole flat now fits, and the labels below are enlarged to
-       stay legible at that scale. ENLARGE remains for close inspection. */
     min-width: 0;
   }
 
-  /* Smaller drawing scale on phones, so the labels need more user units to
-     land at a comparable ~11px on screen. At that size they outgrow the fixed
-     knockout plates, so the plates go and the stroke carries the clearance. */
   .ms-labelbox {
-    display: none;
+    display: block;
+    fill: var(--ms-panel);
   }
 
   .ms-label {
-    font-size: 30px;
-    stroke-width: 22;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    stroke-width: 8;
   }
 
   .ms-enlarge {
