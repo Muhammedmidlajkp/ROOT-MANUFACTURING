@@ -55,6 +55,20 @@
   --trans-slow: 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 
   --max-content-width: 1440px;
+
+  /* Page gutter. Mobile used a raw 6vw, which bottomed out at 19px on a 320px
+     screen — too tight for an editorial layout. The floor holds it at 22px
+     without changing anything from ~370px upward. Desktop keeps its own 8vw. */
+  --page-gutter: clamp(22px, 6vw, 88px);
+
+  /* Control scale. The .button family previously shipped one fixed size
+     (13px/18px padding, 10px type) from 320px to 2560px, so the same box that
+     reads as a considered editorial button at 1440px consumed half the width
+     of a 320px screen. These are overridden once, in the mobile block. */
+  --control-pad-y: 13px;
+  --control-pad-x: 18px;
+  --control-fs: 10px;
+  --control-gap: 14px;
 }
 
 /* --------------------------------------------------------------------------
@@ -66,7 +80,7 @@
    See assets/README.md for the full external-image inventory.
    -------------------------------------------------------------------------- */
 :root {
-  --img-story: url('https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=1400&q=85');
+  --img-story: url('../assets/images/roots-story-craftsmanship.webp');
   --img-quality: url('https://images.unsplash.com/photo-1598032895397-b9472444bf93?auto=format&fit=crop&w=2400&q=90');
   --img-closing: url('https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=2400&q=90');
 }
@@ -236,14 +250,14 @@ p {
    -------------------------------------------------------------------------- */
 .button,
 .nav-cta {
-  font-size: 10px;
+  font-size: var(--control-fs);
   letter-spacing: 0.16em;
   font-weight: 600;
   text-transform: uppercase;
-  padding: 13px 18px;
+  padding: var(--control-pad-y) var(--control-pad-x);
   border: 1px solid currentColor;
   display: inline-flex;
-  gap: 14px;
+  gap: var(--control-gap);
   align-items: center;
   transition: all var(--trans-smooth);
 }
@@ -412,7 +426,7 @@ p {
   inset: 0;
   background-color: var(--roots-black);
   z-index: 90;
-  padding: 100px 6vw 40px;
+  padding: 100px var(--page-gutter) 40px;
   flex-direction: column;
   justify-content: space-between;
   opacity: 0;
@@ -619,13 +633,6 @@ p {
   margin-bottom: 24px;
 }
 
-.h-dash {
-  color: var(--roots-red);
-  font-size: 12px;
-  line-height: 1;
-  display: inline-block;
-}
-
 .h-sep {
   color: rgba(250, 249, 246, 0.25);
 }
@@ -829,11 +836,16 @@ p {
   max-width: 420px;
 }
 
-.intro-copy p,
-.story-copy>p,
-.focus-head p,
-.process-head p,
-.closing-content>p {
+/* `:not(.eyebrow)` matters. These selectors are specificity (0,1,1) and beat
+   the (0,1,0) `.eyebrow` rule, so the eyebrows that happen to be direct
+   children here — "BUILT ON EXPERIENCE" in Story, "THE NEXT CHAPTER" in the
+   closing CTA — were rendering as 15px muted body copy instead of the 11px
+   uppercase label used by every other eyebrow on the site. */
+.intro-copy p:not(.eyebrow),
+.story-copy>p:not(.eyebrow),
+.focus-head p:not(.eyebrow),
+.process-head p:not(.eyebrow),
+.closing-content>p:not(.eyebrow) {
   font-size: 15px;
   line-height: 1.65;
   color: var(--roots-text-muted);
@@ -920,11 +932,21 @@ p {
   max-width: 280px;
 }
 
+/* Sized by ratio, not by viewport height. With `height: 56vh` the frame kept a
+   fixed height while the width tracked the viewport, so the same photograph was
+   asked to work at 0.61:1 on a 320px phone and 4.27:1 on a 2560px display — a
+   seven-fold swing that left the subject cropped out at both ends. A ratio with
+   a height cap holds the crop inside a sane band at every width. */
 .process-visual {
   margin: 60px 0 0 0;
   position: relative;
-  height: 56vh;
+  /* Explicit width keeps the box definite. With `width: auto` the max-height
+     clamps the ratio by shrinking the frame instead of trimming its height,
+     which left 799px of dead space beside it at 2560px. */
+  width: 100%;
+  aspect-ratio: 16 / 9;
   min-height: 400px;
+  max-height: 760px;
   overflow: hidden;
 }
 
@@ -1644,8 +1666,28 @@ p {
 }
 
 @media (max-width: 800px) {
+
+  /* One place sets the phone control scale. 13px/18px padding at 10px type is
+     an editorial desktop button; on a 320px screen the same box was 43px tall
+     and half the viewport wide. 11px/15px keeps a comfortable ~39px target
+     without turning into a full-width pill. */
+  :root {
+    --control-pad-y: 11px;
+    --control-pad-x: 15px;
+    --control-fs: 9.5px;
+    --control-gap: 10px;
+  }
+
+  /* The global h2 clamp floors at 3rem, so every section heading stayed 48px
+     all the way down to 320px — "WE DON'T JUST MAKE GARMENTS" broke onto seven
+     lines of ~11 characters. This floor tracks the hero headline's treatment
+     and still reaches 48px by ~560px, where the old value took over. */
+  h2 {
+    font-size: clamp(2.15rem, 8.6vw, 3rem);
+  }
+
   .site-header {
-    padding: 18px 6vw;
+    padding: 18px var(--page-gutter);
   }
 
   .site-header nav {
@@ -1663,7 +1705,7 @@ p {
 
   .quality-content,
   .closing-content {
-    padding: 130px 6vw 70px;
+    padding: 130px var(--page-gutter) 70px;
   }
 
   /* ── Hero mobile composition ── */
@@ -1673,7 +1715,7 @@ p {
       clamp(84px, 10.5vh, 104px)
       0
       clamp(48px, 6vh, 68px)
-      6vw;
+      var(--page-gutter);
   }
 
   .hero-bg {
@@ -1724,8 +1766,8 @@ p {
   }
 
   .hero-meta {
-    left: 6vw;
-    right: 6vw;
+    left: var(--page-gutter);
+    right: var(--page-gutter);
     /* 8px is below the practical legibility floor on a phone */
     font-size: 9.5px;
     letter-spacing: 0.14em;
@@ -1737,7 +1779,7 @@ p {
 
   .section-ivory,
   .section-black {
-    padding: 75px 6vw;
+    padding: 75px var(--page-gutter);
   }
 
   .section-kicker {
@@ -1780,8 +1822,9 @@ p {
 
   .process-visual {
     margin-top: 40px;
-    height: 50vh;
-    min-height: 340px;
+    aspect-ratio: 4 / 3;
+    min-height: 300px;
+    max-height: 520px;
   }
 
   .capabilities-head .button {
@@ -1801,25 +1844,76 @@ p {
     padding-left: 45px;
   }
 
+  /* A fixed pixel height made the crop change shape across the range: the same
+     photograph was a 282x380 portrait at 320px and a 676x380 letterbox at
+     768px, so each tile lost its subject at one end. A ratio keeps the crop
+     constant; max-height stops a single column ballooning on wide phones. */
   .focus-grid {
     grid-template-columns: 1fr;
     margin-top: 40px;
   }
 
   .focus-tile {
-    height: 380px;
+    height: auto;
+    /* An explicit width keeps the box definite. Without it the grid item's
+       stretch width is treated as indefinite, so max-height clamped the ratio
+       by shrinking the tile to 368px inside a 422px column instead of
+       trimming its height, leaving it floating off the section's edges. */
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    /* Held at the previous fixed height so the section is never taller than it
+       was: below ~375px the ratio now wins and the tile is shorter, above it
+       the cap holds. Either way the crop never reaches the 1.78:1 letterbox
+       that a 676x380 tile produced at 768px. */
+    max-height: 380px;
+  }
+
+  /* Two up before a single tile would letterbox. Also halves the section from
+     2131px to ~1100px of scrolling on a phone. */
+  @media (min-width: 640px) {
+    .focus-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .focus-tile {
+      aspect-ratio: 3 / 4;
+      max-height: none;
+    }
+  }
+
+  /* The title alone is 30px serif and nearly filled the row, so it collided
+     with "VIEW DETAILS" on phones. Number + title on one line, action below. */
+  .tile-label {
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 4px 10px;
+  }
+
+  .tile-label strong {
+    font-size: 24px;
+  }
+
+  .tile-label span:last-child {
+    flex: 1 0 100%;
   }
 
   .material-strip {
     display: flex;
     overflow-x: auto;
-    margin-right: -6vw;
-    padding-right: 6vw;
+    margin-right: calc(-1 * var(--page-gutter));
+    padding-right: var(--page-gutter);
     scroll-snap-type: x mandatory;
   }
 
+  /* 70vw alone kept growing: by 800px a single fabric swatch was 560x730 —
+     taller than most laptop screens — and you still only saw 1.3 of them. The
+     cap holds the swatch at a readable 300px and brings 2-3 into view as the
+     screen widens, so the carousel eases toward the four-up grid at 820px. */
   .material-item {
-    min-width: 70vw;
+    min-width: min(70vw, 300px);
     scroll-snap-align: start;
   }
 
@@ -1835,7 +1929,7 @@ p {
 
   .mission-half {
     min-height: 480px;
-    padding: 70px 6vw;
+    padding: 70px var(--page-gutter);
   }
 
   /* "BETTER MANUFACTURING" is one forced line; at the 2.8rem floor it needed
@@ -1857,7 +1951,7 @@ p {
   }
 
   .footer {
-    padding: 60px 6vw 22px;
+    padding: 60px var(--page-gutter) 22px;
   }
 
   .footer-top {
@@ -1877,6 +1971,100 @@ p {
     flex-direction: column;
     gap: 10px;
     line-height: 1.5;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   21b. TABLET BAND — 801px to 1080px
+
+   This range had no rules of its own. The mobile block stopped at 800px and
+   the desktop layout assumes roughly 1100px, so an 820px tablet got the full
+   desktop navigation crammed into six items plus a CTA that wrapped onto two
+   lines, two-column grids at half their intended width, and 16px of genuine
+   horizontal overflow where "MANUFACTURING." in the Vision panel could not fit
+   its 344px column at 56px type.
+   -------------------------------------------------------------------------- */
+@media (min-width: 801px) and (max-width: 1080px) {
+
+  /* Six nav items plus a CTA need ~1100px to breathe. Below that the drawer
+     is the better control — it is already built, and already holds the CTA. */
+  .site-header nav {
+    display: none;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  .nav-cta {
+    --control-pad-y: 11px;
+    --control-pad-x: 15px;
+    --control-fs: 9.5px;
+    --control-gap: 10px;
+  }
+
+  /* Stacking these is what removes the 820px overflow. Each was a two-column
+     grid inheriting desktop type sizes at roughly half the desktop width. */
+  .mission,
+  .contact-grid,
+  .intro-grid,
+  .why-grid {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .mission-half {
+    min-height: 420px;
+    padding: 72px var(--page-gutter);
+  }
+
+  .mission-half h2 {
+    font-size: clamp(2.4rem, 5.4vw, 3.4rem);
+  }
+
+  .quality-content,
+  .closing-content {
+    padding: 130px var(--page-gutter) 70px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   21c. SMALL PHONES — 520px and below
+   Refinements that only make sense once the screen is genuinely narrow.
+   -------------------------------------------------------------------------- */
+@media (max-width: 520px) {
+
+  /* The header CTA wrapped onto two lines at 320px and took 53% of the bar,
+     squeezing the logo and the menu button. The drawer carries the same
+     "START A PARTNERSHIP" action, so nothing is lost by dropping it here. */
+  .nav-cta {
+    display: none;
+  }
+
+  .section-ivory,
+  .section-black {
+    padding: 60px var(--page-gutter);
+  }
+
+  .section-kicker {
+    margin-bottom: 30px;
+  }
+
+  /* Two columns forced the 29-character email to break mid-token
+     ("rootsbusinessconnect@gm / ail.com"). One column lets it sit whole. */
+  .footer-top {
+    grid-template-columns: 1fr;
+    gap: 34px;
+    min-height: 0;
+  }
+
+  .footer-brand {
+    grid-column: auto;
+  }
+
+  /* 25px tall is past the 24px minimum but tight for six stacked links. */
+  .footer nav a {
+    padding: 6px 0;
   }
 }
 
@@ -2080,38 +2268,6 @@ p {
   }
 }
 
-.roots-loader-place {
-  margin-top: clamp(13px, 1.6vw, 18px);
-  font-family: var(--font-sans);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  /* 5.7:1 on #060606 */
-  color: rgba(250, 249, 246, 0.5);
-  animation: rootsPlaceRise 480ms cubic-bezier(0.16, 1, 0.3, 1) 800ms both;
-}
-
-@keyframes rootsPlaceRise {
-  from {
-    opacity: 0;
-    transform: translateY(7px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 480px) {
-  .roots-loader-place {
-    font-size: 9px;
-    letter-spacing: 0.22em;
-  }
-}
-
 /* Reduced motion: the card still appears, but nothing travels — no sweep, no
    settle, no rise. Only opacity changes, and the page is released in 0.82s
    rather than 1.8s.
@@ -2135,10 +2291,222 @@ p {
   }
 
   .roots-loader-stage,
-  .roots-loader-rule,
-  .roots-loader-place {
+  .roots-loader-rule {
     animation: none !important;
     transform: none !important;
     opacity: 1 !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   24. FLOATING WHATSAPP CONTACT
+
+   A secondary channel, and styled to stay one: ink ground with no colour at
+   rest, no standing label, and less visual weight than START A PARTNERSHIP.
+   Subtle organic resting floating motion, smooth entrance, and refined luxury
+   emerald micro-interaction on hover/focus. Shared by both pages.
+   -------------------------------------------------------------------------- */
+.wa-float {
+  position: fixed;
+  right: clamp(16px, 3vw, 28px);
+  /* env() keeps it clear of the iOS home indicator and Android gesture bar. */
+  bottom: calc(clamp(16px, 3vw, 28px) + env(safe-area-inset-bottom, 0px));
+  /* Below the mobile drawer (90) and the enlarged technical drawing (120) so
+     neither is ever obscured, above ordinary page content. */
+  z-index: 40;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--roots-black);
+  /* Hairline border reads cleanly on dark sections; shadow defines edge on ivory */
+  border: 1px solid rgba(250, 249, 246, 0.16);
+  /* Dual-layer depth: crisp contact shadow + wide ambient blur */
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.22),
+    0 8px 24px rgba(0, 0, 0, 0.28);
+  color: var(--roots-white);
+  /* Subtle organic floating breath: 6s smooth ease-in-out */
+  animation: waRestFloat 6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  transition:
+    background-color 340ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 340ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 340ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 340ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 460ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wa-float-icon {
+  /* 20 of 48 is ~42%: balanced glyph scale */
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  display: block;
+  transition: transform 340ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hover & Focus Interaction — Refined luxury emerald tone + micro lift */
+.wa-float:hover,
+.wa-float:focus-visible {
+  animation-play-state: paused;
+  background-color: #075e54;
+  border-color: #0d7065;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.2),
+    0 14px 32px rgba(7, 94, 84, 0.32),
+    0 0 16px rgba(7, 94, 84, 0.2);
+}
+
+/* Subtle micro-motion on WhatsApp glyph */
+.wa-float:hover .wa-float-icon,
+.wa-float:focus-visible .wa-float-icon {
+  transform: translateY(-0.5px) scale(1.05);
+}
+
+.wa-float:focus-visible {
+  outline: 2px solid var(--roots-red);
+  outline-offset: 3px;
+}
+
+/* Editorial Tooltip — crisp typography & geometric pointer */
+.wa-float-tip {
+  position: absolute;
+  right: calc(100% + 14px);
+  white-space: nowrap;
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--roots-white);
+  background-color: var(--roots-black);
+  border: 1px solid rgba(250, 249, 246, 0.18);
+  padding: 7px 13px;
+  border-radius: 2px;
+  opacity: 0;
+  transform: translateX(8px);
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+  transition:
+    opacity 240ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wa-float-tip::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 7px;
+  height: 7px;
+  background-color: var(--roots-black);
+  border-top: 1px solid rgba(250, 249, 246, 0.18);
+  border-right: 1px solid rgba(250, 249, 246, 0.18);
+}
+
+/* Hover reveal for fine pointers */
+@media (hover: hover) and (pointer: fine) {
+  .wa-float:hover .wa-float-tip {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.wa-float:focus-visible .wa-float-tip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Touch devices hide tooltip to prevent sticky tap overlays */
+@media (hover: none),
+(pointer: coarse) {
+  .wa-float-tip {
+    display: none;
+  }
+}
+
+/* Desktop sizing (>1024px) */
+@media (min-width: 1025px) {
+  .wa-float {
+    width: 52px;
+    height: 52px;
+  }
+
+  .wa-float-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* Keyframes: Resting Floating Wave (subtle 2.5px travel) */
+@keyframes waRestFloat {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.22),
+      0 8px 24px rgba(0, 0, 0, 0.28);
+  }
+  50% {
+    transform: translateY(-2.5px);
+    box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.18),
+      0 12px 28px rgba(0, 0, 0, 0.32);
+  }
+}
+
+/* Keyframes: Smooth Entrance Animation (run once past hero) */
+@keyframes waEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.92);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-1.5px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.wa-float.has-entered {
+  animation: waEntrance 750ms cubic-bezier(0.16, 1, 0.3, 1) both, waRestFloat 6s cubic-bezier(0.45, 0.05, 0.55, 0.95) 750ms infinite;
+}
+
+/* Held back while hero is on screen */
+.wa-float.is-held {
+  opacity: 0;
+  transform: translateY(12px) scale(0.92);
+  pointer-events: none;
+  animation: none;
+}
+
+/* Stand aside during input focus on forms */
+body:has(input:not([type="radio"]):not([type="checkbox"]):not([type="button"]):not([type="submit"]):focus, textarea:focus, select:focus) .wa-float {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .wa-float,
+  .wa-float-icon,
+  .wa-float-tip {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .wa-float:hover,
+  .wa-float:focus-visible,
+  .wa-float:hover .wa-float-icon,
+  .wa-float:focus-visible .wa-float-icon,
+  .wa-float.is-held {
+    transform: none !important;
   }
 }

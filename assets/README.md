@@ -21,8 +21,43 @@ browser never needs.
 | `images/roots-logo-mark.png` | 31 KB | Homepage loading screen only |
 | `images/roots-hero-craftsmanship.webp` | 154 KB | Homepage hero, ≥801px |
 | `images/roots-hero-craftsmanship-mobile.webp` | 75 KB | Homepage hero, ≤800px |
-| `../favicon.svg` | **629 KB** | Favicon, all sizes |
-| `../favicon.png` | **472 KB** | Apple touch icon |
+| `../favicon.ico` | 2.15 KB | Tabs and bookmarks — 16, 32 and 48px in one file |
+| `../favicon-32.png` | 0.68 KB | Tab icon for browsers that prefer PNG (32×32) |
+| `../favicon-180.png` | 5.74 KB | High-res icon / Apple touch icon (180×180) |
+| `../apple-touch-icon.png` | 5.74 KB | Apple touch icon (180×180) |
+
+### Favicons — optimized technical rasterization
+
+Now **~14 KB total package** across all formats, with the exact approved ROOTS signature wordmark preserved:
+- Canvas cropped tightly to ink bounds (94% width fill vs previous 68%).
+- Alpha-boosted gamma-corrected rasterization at 16×16, 20×20, 24×24, and 32×32 so fine script strokes maintain solid opacity and high contrast.
+- Un-matted pure transparency on dark and light browser chrome.
+
+What was wrong, and none of it was the artwork:
+
+- `favicon.svg` was a 128x128 `<svg>` whose entire content was one base64 PNG at
+  912x713 — roughly 28x the pixels a 32px tab icon can show.
+- The source was **not square** (912x713), so it was letterboxed inside the
+  square viewBox rather than filling it.
+- It was **fully opaque**, so on dark browser chrome the icon read as a white
+  plate with a small red mark inside it.
+- A detached 12px wedge sat in columns 0-11, cut off from the wordmark by 40
+  columns of white — a crop remnant that rendered as a speck beside the mark.
+
+The replacements are resampled from that same approved wordmark: cropped to the
+mark's own ink box (remnant excluded), squared, and un-matted so the white
+ground becomes transparency and the script reads on light and dark chrome alike.
+Composited back over white it is identical to the original.
+
+The originals are kept at `masters/favicon-wordmark-full.svg` and
+`masters/favicon-wordmark-912x713.png`.
+
+**Known limitation, not a defect:** the ROOTS wordmark is a script signature, so
+at 16px it reduces to a red flourish rather than a readable word. That is
+inherent to the mark, not to the encoding. `masters/favicon-monogram.svg`
+(1.6 KB) holds an "R" monogram that stays legible at 16px if a more functional
+tab icon is ever wanted; it is not currently used, and swapping it in is a brand
+decision rather than a technical one.
 
 ### `roots-logo-mark.png`
 
@@ -62,6 +97,28 @@ for phones.
 
 None are ROOTS-owned. All are hotlinked, so they remain an availability
 dependency and an unverified commercial-licensing question.
+
+### Status, checked 2026-09-06
+
+All 18 placements returned 200 and rendered correctly. Every one is
+**temporary** — topically truthful stock standing in for photography ROOTS does
+not yet own. None has a local replacement. See the replacement priority below.
+
+Two things worth recording:
+
+- **The availability risk is real, not theoretical.** During the previous audit
+  the machine briefly lost its connection and all 18 images failed at once while
+  the rest of the site rendered normally. That is exactly what a visitor on a
+  poor connection, a restricted corporate network, or a region that blocks the
+  CDN would see. Hosting these locally is the fix, and it also settles the
+  licensing question.
+- **They are now served responsively.** Each `<img>` carries `srcset`/`sizes`
+  and the Unsplash CDN returns any width from the same photo id, so a phone
+  fetches roughly a 340px file where it used to fetch the 1200px desktop one.
+  Homepage image payload dropped from 1,484 KB to 333 KB on a 390px phone and
+  to 768 KB at 1440px. **When these move to local files, the same `srcset`
+  widths must be generated as real files** — the responsive behaviour is
+  currently doing the CDN's resizing for free.
 
 ### Corrected 2026-09-05 — subject now matches label
 

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROOTS — WhatsApp Button Interaction Test</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --roots-black: #080808;
+      --roots-white: #faf9f6;
+      --roots-ivory: #f3f0e9;
+      --roots-red: #f80006;
+      --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: #0f1117;
+      color: #e2e8f0;
+      padding: 40px;
+    }
+
+    h1 { font-size: 22px; margin-bottom: 8px; color: #fff; }
+    p.sub { font-size: 13px; color: #94a3b8; margin-bottom: 32px; }
+
+    .test-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 40px;
+    }
+
+    .preview-card {
+      background: #18191f;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .preview-card.light {
+      background: var(--roots-ivory);
+      color: #080808;
+      border-color: #cbd5e1;
+    }
+
+    .preview-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    /* ── REFINED FLOATING WHATSAPP BUTTON SYSTEM ── */
+    .wa-float-demo {
+      position: absolute;
+      right: 28px;
+      bottom: 28px;
+      z-index: 40;
+      width: 48px;
+      height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background-color: var(--roots-black);
+      border: 1px solid rgba(250, 249, 246, 0.16);
+      color: var(--roots-white);
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.22),
+        0 8px 24px rgba(0, 0, 0, 0.28);
+      /* Organic resting float: 6s smooth ease-in-out breathing */
+      animation: waRestFloat 6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      transition:
+        background-color 340ms cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 340ms cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 340ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 340ms cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 460ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (min-width: 1025px) {
+      .wa-float-demo {
+        width: 52px;
+        height: 52px;
+      }
+    }
+
+    .wa-float-icon-demo {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+      display: block;
+      transition: transform 340ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (min-width: 1025px) {
+      .wa-float-icon-demo {
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    /* Hover & Focus State */
+    .wa-float-demo:hover,
+    .wa-float-demo:focus-visible {
+      animation-play-state: paused;
+      background-color: #075e54;
+      border-color: #0d7065;
+      transform: translateY(-3px) scale(1.03);
+      box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.2),
+        0 14px 32px rgba(7, 94, 84, 0.32),
+        0 0 16px rgba(7, 94, 84, 0.2);
+    }
+
+    .wa-float-demo:hover .wa-float-icon-demo,
+    .wa-float-demo:focus-visible .wa-float-icon-demo {
+      transform: translateY(-0.5px) scale(1.05);
+    }
+
+    .wa-float-demo:focus-visible {
+      outline: 2px solid var(--roots-red);
+      outline-offset: 3px;
+    }
+
+    /* Tooltip */
+    .wa-float-tip-demo {
+      position: absolute;
+      right: calc(100% + 14px);
+      white-space: nowrap;
+      font-family: var(--font-sans);
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--roots-white);
+      background-color: var(--roots-black);
+      border: 1px solid rgba(250, 249, 246, 0.18);
+      padding: 7px 13px;
+      border-radius: 2px;
+      opacity: 0;
+      transform: translateX(8px);
+      pointer-events: none;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+      transition:
+        opacity 240ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .wa-float-tip-demo::after {
+      content: '';
+      position: absolute;
+      right: -4px;
+      top: 50%;
+      transform: translateY(-50%) rotate(45deg);
+      width: 7px;
+      height: 7px;
+      background-color: var(--roots-black);
+      border-top: 1px solid rgba(250, 249, 246, 0.18);
+      border-right: 1px solid rgba(250, 249, 246, 0.18);
+    }
+
+    .wa-float-demo:hover .wa-float-tip-demo,
+    .wa-float-demo:focus-visible .wa-float-tip-demo {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Keyframes: Resting Float Motion (subtle ~2.5px wave) */
+    @keyframes waRestFloat {
+      0%, 100% {
+        transform: translateY(0);
+        box-shadow:
+          0 2px 5px rgba(0, 0, 0, 0.22),
+          0 8px 24px rgba(0, 0, 0, 0.28);
+      }
+      50% {
+        transform: translateY(-2.5px);
+        box-shadow:
+          0 4px 8px rgba(0, 0, 0, 0.18),
+          0 12px 28px rgba(0, 0, 0, 0.32);
+      }
+    }
+
+    /* Keyframes: Smooth Entrance Animation */
+    @keyframes waEntrance {
+      0% {
+        opacity: 0;
+        transform: translateY(14px) scale(0.92);
+      }
+      65% {
+        opacity: 1;
+        transform: translateY(-1.5px) scale(1.02);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .wa-float-demo.animate-entrance {
+      animation: waEntrance 750ms cubic-bezier(0.16, 1, 0.3, 1) both, waRestFloat 6s cubic-bezier(0.45, 0.05, 0.55, 0.95) 750ms infinite;
+    }
+
+    /* Held state (over hero) */
+    .wa-float-demo.is-held {
+      opacity: 0;
+      transform: translateY(12px) scale(0.92);
+      pointer-events: none;
+      animation: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .wa-float-demo,
+      .wa-float-icon-demo,
+      .wa-float-tip-demo {
+        animation: none !important;
+        transition: none !important;
+      }
+      .wa-float-demo:hover,
+      .wa-float-demo:focus-visible {
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ROOTS — Floating WhatsApp Micro-Interaction QA</h1>
+  <p class="sub">Testing resting float motion, hover state, focus-visible, and tooltip across dark and light sections.</p>
+
+  <div class="test-grid">
+    <!-- Dark Background Section Preview -->
+    <div class="preview-card">
+      <div class="preview-title">Dark Theme Section Preview (e.g. Hero / Dark Section)</div>
+      <p style="font-size: 12px; color: #94a3b8; max-width: 320px;">
+        Button seats quietly with hairline border and dual-layer ambient shadow. Subtle 6s resting breathing motion.
+      </p>
+      <a class="wa-float-demo" href="#" aria-label="Chat with ROOTS on WhatsApp">
+        <svg class="wa-float-icon-demo" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.693.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
+        <span class="wa-float-tip-demo" aria-hidden="true">Chat on WhatsApp</span>
+      </a>
+    </div>
+
+    <!-- Light Ivory Background Section Preview -->
+    <div class="preview-card light">
+      <div class="preview-title" style="color: #080808;">Ivory Section Preview (e.g. About / Focus / Story)</div>
+      <p style="font-size: 12px; color: #555; max-width: 320px;">
+        On ivory ground, the black disc and contact shadow pop with confident editorial authority. No white box artifact.
+      </p>
+      <a class="wa-float-demo" href="#" aria-label="Chat with ROOTS on WhatsApp">
+        <svg class="wa-float-icon-demo" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.693.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
+        <span class="wa-float-tip-demo" aria-hidden="true">Chat on WhatsApp</span>
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>

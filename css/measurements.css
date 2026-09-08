@@ -527,8 +527,10 @@
 .ms-enlarge {
   display: none;
   margin-left: auto;
-  min-height: 34px;
-  padding: 8px 12px;
+  /* 34px sat below every other control on the page (the .ms-btn family is 48)
+     while being the one control that only ever appears on touch screens. */
+  min-height: 40px;
+  padding: 10px 14px;
   font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 600;
@@ -1537,7 +1539,10 @@ body.ms-locked {
   }
 }
 
-@media (max-width: 800px) {
+/* Matches the homepage: six nav items need ~1100px, so the drawer takes over
+   from 1080px down rather than 800px. Between those widths the desktop nav was
+   crammed and the back CTA wrapped onto two lines. */
+@media (max-width: 1080px) {
   .page-measurements .site-header nav {
     display: none;
   }
@@ -1546,6 +1551,9 @@ body.ms-locked {
     font-size: 9px;
     padding: 10px 14px;
   }
+}
+
+@media (max-width: 800px) {
 
   /* ---- Mobile hero: intentionally compact, drawing reachable quickly ---- */
   .ms-intro {
@@ -1667,6 +1675,18 @@ body.ms-locked {
   }
 }
 
+/* At 320px "ENLARGE DRAWING" took 53% of the drawing header and squeezed
+   "Technical flat / Shirt / Front" onto five lines. Tightening the type — not
+   the 40px touch height — puts the secondary control back below the label it
+   sits beside and returns the header to two lines. */
+@media (max-width: 360px) {
+  .ms-enlarge {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 10px;
+  }
+}
+
 @media (max-width: 420px) {
   .page-measurements .nav-cta.ms-back {
     letter-spacing: 0.1em;
@@ -1691,6 +1711,41 @@ body.ms-locked {
   .ms-delivery {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  /* The primary action filling the width is right on a phone. The secondary
+     was matching it exactly, so "CLEAR FORM" carried the same weight as
+     "REVIEW SPECIFICATION" and destructive sat level with primary. Sizing it
+     to its own content restores the hierarchy without restyling the button. */
+  .ms-form-actions .ms-btn--quiet,
+  .ms-review-actions .ms-btn--quiet,
+  .ms-result-actions .ms-btn--quiet {
+    width: auto;
+    align-self: center;
+  }
+
+  /* Three columns cannot hold "SPECIFICATION": at 11px with 0.16em tracking it
+     needs ~112px and the column is 87px, so it ran into "REVIEW". Back to the
+     stacked list the base rule already defines. */
+  .ms-steps {
+    grid-template-columns: minmax(0, 1fr);
+    border-bottom: 0;
+  }
+
+  .ms-steps li {
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 0 12px;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--ms-rule);
+  }
+
+  .ms-steps li:last-child {
+    border-bottom: 0;
+  }
+
+  .ms-step-num {
+    grid-row: auto;
   }
 
   .ms-unit-toggle {

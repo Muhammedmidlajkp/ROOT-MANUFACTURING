@@ -11,6 +11,58 @@
   const CONTACT_EMAIL = 'rootsbusinessconnect@gmail.com';
 
   // ------------------------------------------------------------------------
+  // 0. Homepage entry state — a refresh starts at the hero
+  //
+  // Reading a section leaves its id in the address bar (#contact), and both the
+  // hash and the browser's own scroll restoration would otherwise reopen the
+  // page halfway down on the next refresh. The homepage should introduce itself
+  // from the top.
+  //
+  // Scoped tightly, because the alternative is breaking navigation:
+  //   reload        -> hero, hash dropped via replaceState (no second request,
+  //                    so no redirect loop)
+  //   navigate      -> untouched, so a link or a typed URL ending in #contact
+  //                    still lands on the contact section
+  //   back_forward  -> untouched, so the browser restores position as expected
+  //
+  // Runs at parse time rather than on DOMContentLoaded so it beats the
+  // browser's own scroll-to-fragment step.
+  // ------------------------------------------------------------------------
+  function initHomeEntryState() {
+    if (!document.querySelector('.hero')) return;
+
+    let navType = '';
+    try {
+      const entry = performance.getEntriesByType('navigation')[0];
+      navType = entry ? entry.type : '';
+    } catch (e) { /* older browsers fall through to the legacy check below */ }
+
+    if (!navType && performance.navigation) {
+      navType = performance.navigation.type === 1 ? 'reload' : 'navigate';
+    }
+
+    if (navType !== 'reload') return;
+
+    const supportsRestore = 'scrollRestoration' in history;
+    const previous = supportsRestore ? history.scrollRestoration : null;
+    // Suppressed for this load only. Handing it back afterwards keeps
+    // back/forward returning the reader to where they were.
+    if (supportsRestore) history.scrollRestoration = 'manual';
+
+    if (location.hash) {
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+    window.scrollTo(0, 0);
+
+    window.addEventListener('load', () => {
+      window.scrollTo(0, 0);
+      if (supportsRestore) history.scrollRestoration = previous || 'auto';
+    }, { once: true });
+  }
+
+  initHomeEntryState();
+
+  // ------------------------------------------------------------------------
   // 0a. Brand title card
   //
   // The card reveals, holds and clears entirely in CSS (style.css section 23)
@@ -73,43 +125,83 @@
   }
 
   // ------------------------------------------------------------------------
+  // 0c. Floating WhatsApp button — hold it back over the hero
+  //
+  // The hero's "SCROLL TO DISCOVER" marker sits in the bottom-right corner,
+  // exactly where the floating button lives, and the hero already carries the
+  // primary CTA. So the button waits until the hero has been scrolled past.
+  // One IntersectionObserver, no scroll listener. Pages without a .hero (the
+  // measurements page) return early and simply keep the button visible.
+  // ------------------------------------------------------------------------
+  function initWhatsAppReveal() {
+    const btn = document.querySelector('.wa-float');
+    const hero = document.querySelector('.hero');
+    if (!btn || !hero || typeof IntersectionObserver !== 'function') return;
+
+    btn.classList.add('is-held');
+    let hasEntered = false;
+
+    new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const isOverHero = entry.intersectionRatio > 0.25;
+          if (isOverHero) {
+            btn.classList.add('is-held');
+            btn.classList.remove('has-entered');
+          } else {
+            btn.classList.remove('is-held');
+            if (!hasEntered) {
+              hasEntered = true;
+              btn.classList.add('has-entered');
+            }
+          }
+        });
+      },
+      { threshold: [0, 0.25, 0.5] }
+    ).observe(hero);
+  }
+
+  // ------------------------------------------------------------------------
   // 1. Process Stages Interactive Switcher with Keyboard Arrow Navigation
   // ------------------------------------------------------------------------
+  // Candidate widths offered to the browser for the process visual.
+  const PROCESS_WIDTHS = [600, 900, 1200, 1600, 2200];
+
   const processStages = [
     {
       name: 'DESIGN',
       copy: 'Transforming creative concepts into production-ready apparel with technical precision.',
-      image: 'https://images.unsplash.com/photo-1721664195489-7448042bf305?auto=format&fit=crop&w=1600&q=85',
+      image: 'https://images.unsplash.com/photo-1721664195489-7448042bf305?auto=format&fit=crop&q=85',
       alt: 'A hand tracing a paper garment pattern beside scissors'
     },
     {
       name: 'SOURCING',
       copy: 'Expert material and fabric sourcing for every brief, from premium denim to sustainable linen.',
-      image: 'https://images.unsplash.com/photo-1621882844178-fa8129633ce4?auto=format&fit=crop&w=1600&q=85',
+      image: 'https://images.unsplash.com/photo-1621882844178-fa8129633ce4?auto=format&fit=crop&q=85',
       alt: 'Rolls of fabric stacked together'
     },
     {
       name: 'DEVELOPMENT',
       copy: 'Sampling, fitting, and technical refinement with meticulous attention to detail.',
-      image: 'https://images.unsplash.com/photo-1578353022142-09264fd64295?auto=format&fit=crop&w=1600&q=85',
+      image: 'https://images.unsplash.com/photo-1578353022142-09264fd64295?auto=format&fit=crop&q=85',
       alt: 'Thread spools, scissors, a measuring tape and a pattern on a work surface'
     },
     {
       name: 'MANUFACTURING',
       copy: 'Precision apparel production scaled for your brand with state-of-the-art machinery.',
-      image: 'https://images.unsplash.com/photo-1589793463357-5fb813435467?auto=format&fit=crop&w=1600&q=85',
+      image: 'https://images.unsplash.com/photo-1589793463357-5fb813435467?auto=format&fit=crop&q=85',
       alt: 'Rows of operators at sewing machines in a garment factory'
     },
     {
       name: 'QUALITY',
       copy: 'Comprehensive multi-point inspection and artisan finishing at every single stage.',
-      image: 'https://images.unsplash.com/photo-1772291320136-7bfb40006088?auto=format&fit=crop&w=1600&q=85',
+      image: 'https://images.unsplash.com/photo-1772291320136-7bfb40006088?auto=format&fit=crop&q=85',
       alt: 'Hands inspecting the seam of a pale garment'
     },
     {
       name: 'DELIVERY',
       copy: 'Market-ready, securely packed final production delivered reliably across global destinations.',
-      image: 'https://images.unsplash.com/photo-1549040634-41fbcd2eb623?auto=format&fit=crop&w=1600&q=85',
+      image: 'https://images.unsplash.com/photo-1549040634-41fbcd2eb623?auto=format&fit=crop&q=85',
       alt: 'Finished pressed shirts hanging on a rail'
     }
   ];
@@ -137,7 +229,14 @@
         b.tabIndex = isSelected ? 0 : -1;
       });
 
-      img.src = stage.image;
+      // Serve a width that suits the viewport rather than a fixed 1600px file.
+      // The frame is ~343px wide on a phone and ~2150px on a 2560px display, so
+      // one size meant phones downloaded roughly five times the pixels they use.
+      // Unsplash returns any width from the same photo id, so this is bytes
+      // only — the crop and the picture are unchanged.
+      img.srcset = PROCESS_WIDTHS.map((w) => `${stage.image}&w=${w} ${w}w`).join(', ');
+      img.sizes = '(max-width: 800px) 88vw, 84vw';
+      img.src = `${stage.image}&w=1200`;
       img.alt = stage.alt;
       if (num) num.textContent = String(index + 1).padStart(2, '0');
       if (title) title.textContent = stage.name;
@@ -235,7 +334,7 @@
       );
     };
 
-    const toggleMenu = (open) => {
+    const toggleMenu = (open, restoreFocus) => {
       const isOpen = typeof open === 'boolean' ? open : !drawer.classList.contains('is-open');
       toggleBtn.classList.toggle('is-active', isOpen);
       drawer.classList.toggle('is-open', isOpen);
@@ -250,12 +349,27 @@
       if (isOpen) {
         const focusable = getFocusableElements();
         if (focusable.length) focusable[0].focus();
-      } else {
+      } else if (restoreFocus !== false) {
         toggleBtn.focus();
       }
     };
 
     toggleBtn.addEventListener('click', () => toggleMenu());
+
+    // The drawer is a full-screen overlay that only exists below the width at
+    // which the header nav appears. Without this, rotating a tablet from
+    // portrait to landscape while the drawer is open left it covering the
+    // desktop layout with no visible control to dismiss it. Focus is not
+    // restored here because the toggle button is display:none at these widths.
+    const navQuery = window.matchMedia('(min-width: 1081px)');
+    const closeIfDesktop = (e) => {
+      if (e.matches && drawer.classList.contains('is-open')) toggleMenu(false, false);
+    };
+    if (typeof navQuery.addEventListener === 'function') {
+      navQuery.addEventListener('change', closeIfDesktop);
+    } else if (typeof navQuery.addListener === 'function') {
+      navQuery.addListener(closeIfDesktop);
+    }
 
     // Close when clicking a link inside drawer
     drawer.querySelectorAll('a').forEach((link) => {
@@ -457,6 +571,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     initLogoLoader();
     initHeroScrollEffect();
+    initWhatsAppReveal();
     initProcessSwitcher();
     initCapabilityAccordion();
     initBenefitSelector();
