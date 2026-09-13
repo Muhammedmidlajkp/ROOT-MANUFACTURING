@@ -473,7 +473,7 @@
     const items = document.querySelectorAll('.capability-item');
     if (!items.length) return;
 
-    items.forEach((item) => {
+    items.forEach((item, index) => {
       const trigger = item.querySelector('.capability-trigger');
       const panel = item.querySelector('.capability-panel');
       if (!trigger || !panel) return;
@@ -482,9 +482,42 @@
         const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
         const willExpand = !isExpanded;
 
+        // Smoothly close any other open panel to maintain a clean editorial flow
+        if (willExpand) {
+          items.forEach((sibling) => {
+            if (sibling !== item && sibling.classList.contains('is-open')) {
+              const sibTrigger = sibling.querySelector('.capability-trigger');
+              const sibPanel = sibling.querySelector('.capability-panel');
+              if (sibTrigger) sibTrigger.setAttribute('aria-expanded', 'false');
+              sibling.classList.remove('is-open');
+              if (sibPanel) sibPanel.classList.remove('is-open');
+            }
+          });
+        }
+
         trigger.setAttribute('aria-expanded', String(willExpand));
         item.classList.toggle('is-open', willExpand);
         panel.classList.toggle('is-open', willExpand);
+      });
+
+      // Keyboard arrow navigation
+      trigger.addEventListener('keydown', (e) => {
+        let targetIndex = -1;
+        if (e.key === 'ArrowDown') {
+          targetIndex = (index + 1) % items.length;
+        } else if (e.key === 'ArrowUp') {
+          targetIndex = (index - 1 + items.length) % items.length;
+        } else if (e.key === 'Home') {
+          targetIndex = 0;
+        } else if (e.key === 'End') {
+          targetIndex = items.length - 1;
+        }
+
+        if (targetIndex >= 0) {
+          e.preventDefault();
+          const targetTrigger = items[targetIndex].querySelector('.capability-trigger');
+          if (targetTrigger) targetTrigger.focus();
+        }
       });
     });
   }

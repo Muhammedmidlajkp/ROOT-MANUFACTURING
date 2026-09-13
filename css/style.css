@@ -1,4 +1,131 @@
 /* ==========================================================================
+   SELF-HOSTED WEBFONTS
+
+   The exact faces Google Fonts was serving, downloaded and served from this
+   origin. The site now makes ZERO third-party requests.
+
+   Why: the <link> to fonts.googleapis.com was render-blocking and cross-origin,
+   so every first paint waited on a DNS lookup, TCP connect, TLS handshake and
+   HTTP round trip to Google before the stylesheet naming the fonts arrived —
+   then a SECOND origin (fonts.gstatic.com) for the files themselves. Both hops
+   are gone; the faces are discovered as this file parses and fetched over the
+   connection the page is already using.
+
+   Subsets: latin and latin-ext only. Google also serves cyrillic, cyrillic-ext
+   and vietnamese, but unicode-range meant a browser only ever fetched the latin
+   files for this English-language site, so dropping them removes nothing a
+   visitor was receiving.
+
+   DM Sans is ONE variable file per subset. Google emits three weight blocks all
+   pointing at it, and that is mirrored here rather than 'improved' into a
+   font-weight range — the discrete declarations are what the browser resolves
+   today, and reproducing them exactly is what makes this swap invisible.
+
+   font-display: swap is preserved, so text is never invisible while a face
+   loads, and every font-family declaration below still ends in a real fallback.
+   ========================================================================== */
+
+/* latin-ext */
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/cormorant-garamond-500-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* latin */
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/cormorant-garamond-500-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* latin-ext */
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/cormorant-garamond-500-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* latin */
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/cormorant-garamond-500-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* latin-ext */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/dm-sans-variable-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* latin */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/dm-sans-variable-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* latin-ext */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/dm-sans-variable-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* latin */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/dm-sans-variable-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* latin-ext */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/dm-sans-variable-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* latin */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/dm-sans-variable-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ==========================================================================
    ROOTS APPAREL MANUFACTURING — CORE STYLESHEET
    Vanilla CSS | Pure Static Architecture | High Performance
    ========================================================================== */
@@ -1337,54 +1464,58 @@ p {
 }
 
 .capability-item {
-  border-top: 1px solid rgba(250, 249, 246, 0.2);
-  transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border-top: 1px solid rgba(250, 249, 246, 0.16);
+  transition: background-color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: background-color, border-color;
 }
 
 .capability-item:last-child {
-  border-bottom: 1px solid rgba(250, 249, 246, 0.2);
+  border-bottom: 1px solid rgba(250, 249, 246, 0.16);
 }
 
 .capability-item.is-open {
-  border-top-color: rgba(250, 249, 246, 0.38);
-  background-color: rgba(250, 249, 246, 0.02);
+  border-top-color: rgba(169, 52, 53, 0.55);
+  background-color: rgba(250, 249, 246, 0.025);
 }
 
 .capability-item.is-open + .capability-item {
-  border-top-color: rgba(250, 249, 246, 0.32);
+  border-top-color: rgba(250, 249, 246, 0.28);
 }
 
 .capability-trigger {
   width: 100%;
   display: grid;
-  grid-template-columns: 60px 1fr 30px;
+  grid-template-columns: 60px 1fr 32px;
   align-items: center;
-  padding: 24px 0;
+  padding: 26px 0;
   text-align: left;
   color: var(--roots-white);
   background: none;
   border: 0;
   cursor: pointer;
-  transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              padding-left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, color;
 }
 
 .capability-trigger:hover,
 .capability-trigger:focus-visible {
   color: var(--roots-red-text);
-  padding-left: 8px;
+  transform: translateX(4px);
 }
 
 .capability-item.is-open .capability-trigger {
   color: var(--roots-white);
+  transform: none;
 }
 
 .cap-num {
   font-size: 11px;
   color: var(--roots-muted-light);
   font-weight: 500;
-  transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .capability-item.is-open .cap-num {
@@ -1406,15 +1537,23 @@ p {
 .cap-title {
   font: 500 clamp(1.6rem, 3.2vw, 3.4rem) var(--font-serif);
   letter-spacing: -0.02em;
+  transition: color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.capability-trigger:hover .cap-title {
+  color: var(--roots-red-text);
 }
 
 .capability-trigger .row-arrow {
   text-align: right;
-  font-size: 16px;
-  display: inline-block;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   transform-origin: center center;
-  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
-              color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.52s cubic-bezier(0.22, 1, 0.36, 1),
+              color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 .capability-trigger[aria-expanded="true"] .row-arrow,
@@ -1423,14 +1562,15 @@ p {
   color: var(--roots-red-text);
 }
 
-/* Physics-based Grid-Template-Rows Accordion */
+/* Physics-based Grid-Template-Rows Accordion with Silky Interpolation */
 .capability-panel {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.36s cubic-bezier(0.16, 1, 0.3, 1),
-              visibility 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: grid-template-rows 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+              visibility 0.48s cubic-bezier(0.22, 1, 0.36, 1);
   visibility: hidden;
   overflow: hidden;
+  will-change: grid-template-rows;
 }
 
 .capability-item.is-open .capability-panel,
@@ -1441,12 +1581,12 @@ p {
 
 .capability-panel-inner {
   min-height: 0;
-  padding: 0 0 24px 60px;
+  padding: 0 0 28px 60px;
   max-width: 680px;
   opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(-8px);
+  transition: opacity 0.22s ease,
+              transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
@@ -1454,13 +1594,25 @@ p {
 .capability-panel.is-open .capability-panel-inner {
   opacity: 1;
   transform: translateY(0);
-  transition-delay: 0.08s;
+  transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.1s,
+              transform 0.48s cubic-bezier(0.16, 1, 0.3, 1) 0.08s;
 }
 
 .capability-panel p {
-  font-size: 14px;
-  line-height: 1.65;
+  font-size: 15px;
+  line-height: 1.7;
   color: var(--roots-text-muted-light);
+}
+
+.capability-panel a {
+  color: var(--roots-red-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.capability-panel a:hover {
+  color: var(--roots-white);
 }
 
 /* --------------------------------------------------------------------------
