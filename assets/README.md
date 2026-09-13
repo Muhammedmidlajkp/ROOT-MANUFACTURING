@@ -34,11 +34,11 @@ others by absolute path.
 Sixteen photographs were previously hotlinked from `images.unsplash.com`. All of
 them have been downloaded, re-encoded as WebP at exactly the widths the markup
 asks for, and committed. **No stylesheet, page or script reaches a third-party
-image origin any more.** The only remaining external requests on the whole site
-are the two Google Fonts origins.
+origin any more** — the two Google Fonts origins have since been removed too
+(see *Self-hosted fonts* below).
 
-Measured after the change, homepage first load: **1,251 KB → 815 KB**, 15
-requests, zero failures.
+Measured on the live site before and after: homepage total transfer
+**1,670 KB → 1,385 KB**, third-party image bytes **1,014 KB → 0**.
 
 ### Naming
 
@@ -60,6 +60,48 @@ follow it exactly or the widths will 404.
 - **`roots-focus-denim`** is exposure-lifted (`linear(1.85, -12)`). The source is
   black denim on a dark ground and collapsed to a flat rectangle under the
   greyscale filter; the lift restores the pocket seam and topstitching.
+
+
+## Self-hosted fonts
+
+`assets/fonts/` — 6 woff2 files, 178 KB on disk, of which a visitor downloads 3
+(108 KB): Cormorant Garamond 500 roman and italic, plus the DM Sans variable file.
+
+These are the exact faces Google Fonts was serving. The `@font-face` block lives
+at the top of `css/style.css`, so there is no extra request for it, and the two
+faces painted above the fold are preloaded from every page.
+
+**The site now makes zero third-party requests.** Measured after a full scroll and
+all nine process stages: 32 requests, and the only non-same-origin entry is an
+inline `data:` SVG (the hero grain texture), which is not a network request.
+
+| File | Serves |
+|---|---|
+| `cormorant-garamond-500-latin.woff2` | Headings, roman |
+| `cormorant-garamond-500-italic-latin.woff2` | Heading `<em>` accents |
+| `dm-sans-variable-latin.woff2` | All DM Sans weights — 400, 500 and 600 |
+| the three `-latin-ext` siblings | Only fetched if an extended-latin glyph appears |
+
+Notes for whoever touches this next:
+
+- **DM Sans is ONE variable file.** Google emits three weight blocks all pointing
+  at the same URL; that is mirrored here rather than "improved" into a
+  `font-weight: 400 600` range, because the discrete declarations are what the
+  browser resolves today and reproducing them exactly is what made the swap
+  invisible.
+- **Only latin and latin-ext are kept.** Google also serves cyrillic,
+  cyrillic-ext and vietnamese, but `unicode-range` meant a browser never fetched
+  them for this English-language site.
+- **Arrow and tick glyphs (→ ↗ ✓ ✉) sit outside every subset** and fall back to a
+  system font. That was equally true with Google Fonts — not a regression.
+- **The swap was verified, not assumed.** Rendered text metrics were captured
+  before and after for nine elements spanning both families and all four weights;
+  every value came back byte-identical, and every section height matches the
+  pre-swap build. If these files are ever regenerated, re-run that comparison.
+- `font-display: swap` is preserved and every `font-family` still ends in a real
+  fallback stack, so a failed font load degrades to Georgia / the system sans.
+- **Hosting note:** the server must send `font/woff2`. Vercel does by default.
+  The local `scratch/serve.js` needed it added.
 
 ## Photography that still needs replacing
 

@@ -3,21 +3,26 @@
  * Vanilla JS | Zero dependencies | Progressive, accessible, no framework
  *
  * -------------------------------------------------------------------------
- * BACKEND INTEGRATION REQUIRED
+ * SUBMISSION
  * -------------------------------------------------------------------------
- * ROOTS currently has NO submission endpoint. Neither this page nor the
- * homepage contact form can transmit anything from the browser; both hand the
- * completed enquiry to the visitor's own mail client and say so plainly.
+ * `CONFIG.endpoint` IS configured: a Google Apps Script web app that appends
+ * the specification to a sheet and sends an email alert. The homepage contact
+ * form posts to the same endpoint (see GOOGLE_SHEET_URL in js/main.js).
  *
- * Until `CONFIG.endpoint` is set to a real URL, this page will never claim the
- * specification reached ROOTS. It builds the payload, validates it, and hands
- * the user delivery routes that genuinely work offline (download, clipboard,
- * prefilled email) — only the email route puts it in front of ROOTS, and only
- * once the visitor presses send there.
+ * The one rule this file will not break: it never tells a visitor the
+ * specification reached ROOTS unless the endpoint has said so. Success
+ * requires `status === 'success'` in the parsed reply — POSITIVE confirmation,
+ * not merely the absence of an error. An Apps Script whose access is not set
+ * to "Anyone" answers HTTP 200 with an HTML authorisation page; treating that
+ * as success would tell a client their spec was saved when it was not.
  *
- * To enable real submission, set CONFIG.endpoint to a POST URL that accepts
- * JSON. Server-side validation, spam protection, rate limiting and CSRF
- * remain the backend's responsibility — client-side checks are not enough.
+ * Anything else — a non-2xx, an unparseable body, a missing status — falls
+ * through to the delivery options (download, clipboard, prefilled email),
+ * which work offline and put the specification in the visitor's own hands.
+ * That is the correct fail-closed behaviour: never lose the lead silently.
+ *
+ * Server-side validation, spam protection and rate limiting remain the
+ * backend's responsibility — the client-side checks here are not enough.
  * -------------------------------------------------------------------------
  */
 
@@ -63,8 +68,8 @@
       group: 'body',
       label: 'Body length',
       svgId: 'dim-bodyLength',
-      status: 'pending',
-      required: false,
+      status: 'confirmed',
+      required: true,
       desc: 'From the high point of the shoulder straight down to the hem.'
     },
     {
@@ -428,18 +433,28 @@
 
   function clearAllErrors() {
     MEASUREMENTS.forEach(function (m) { clearError(m.id); });
-    ['garmentType', 'contactName', 'company', 'email'].forEach(clearError);
+    ['garmentType', 'styleReference', 'size', 'contactName', 'company', 'email', 'phone', 'notes'].forEach(clearError);
   }
 
   function validate() {
     clearAllErrors();
     var errors = [];
 
-    // Garment type
+    // Garment type, Style Reference & Size
     var garment = document.getElementById('ms-garmentType');
     if (!garment.value) {
       showError('garmentType', 'Please select the garment type.');
       errors.push(garment);
+    }
+    var styleRef = document.getElementById('ms-styleReference');
+    if (styleRef && !styleRef.value.trim()) {
+      showError('styleReference', 'Please enter your style or reference code.');
+      errors.push(styleRef);
+    }
+    var sizeLabel = document.getElementById('ms-size');
+    if (sizeLabel && !sizeLabel.value.trim()) {
+      showError('size', 'Please enter a size label (e.g. M / 40).');
+      errors.push(sizeLabel);
     }
 
     // Measurements
@@ -456,11 +471,6 @@
         return;
       }
 
-      // The optional sign matters. Without it "-5" failed this shape test and
-      // was reported as "must be a number… remove any units or letters", which
-      // is untrue and unactionable — it is a number. Letting a signed value
-      // through hands it to the `value <= 0` check below, which says the thing
-      // that is actually wrong with it.
       if (!/^-?\d*\.?\d+$/.test(raw)) {
         showError(m.id, m.label + ' must be a number, for example 54.0. Remove any units or letters.');
         errors.push(input);
@@ -485,7 +495,7 @@
     // Contact
     var name = document.getElementById('ms-contactName');
     if (!name.value.trim()) {
-      showError('contactName', 'Please enter your name so ROOTS can reply.');
+      showError('contactName', 'Please enter your full name.');
       errors.push(name);
     }
     var company = document.getElementById('ms-company');
@@ -496,11 +506,30 @@
     var email = document.getElementById('ms-email');
     var emailValue = email.value.trim();
     if (!emailValue) {
-      showError('email', 'Please enter an email address for the reply.');
+      showError('email', 'Please enter an email address for reply.');
       errors.push(email);
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
-      showError('email', 'Please enter a valid email address, for example name@brand.com.');
+      showError('email', 'Please enter a valid email address (e.g. name@brand.com).');
       errors.push(email);
+    }
+    var phone = document.getElementById('ms-phone');
+    if (phone) {
+      var phoneVal = phone.value.trim();
+      if (!phoneVal) {
+        showError('phone', 'Please enter your phone or WhatsApp number.');
+        errors.push(phone);
+      } else if (phoneVal.replace(/\D/g, '').length < 7) {
+        showError('phone', 'Please enter a valid phone number with at least 7 digits.');
+        errors.push(phone);
+      }
+    }
+    var notes = document.getElementById('ms-notes');
+    if (notes && !notes.value.trim()) {
+      showError('notes', 'Please provide production notes, quantities, or fabric details.');
+      errors.push(notes);
+    } else if (notes && notes.value.trim().length < 5) {
+      showError('notes', 'Please provide a little more detail in production notes (at least 5 characters).');
+      errors.push(notes);
     }
 
     return errors;
@@ -529,7 +558,8 @@
       contact: {
         name: document.getElementById('ms-contactName').value.trim(),
         company: document.getElementById('ms-company').value.trim(),
-        email: document.getElementById('ms-email').value.trim()
+        email: document.getElementById('ms-email').value.trim(),
+        phone: document.getElementById('ms-phone') ? document.getElementById('ms-phone').value.trim() : ''
       },
       notes: document.getElementById('ms-notes').value.trim()
     };
@@ -570,6 +600,9 @@
     lines.push('  Name: ' + p.contact.name);
     lines.push('  Brand / company: ' + p.contact.company);
     lines.push('  Email: ' + p.contact.email);
+    if (p.contact.phone) {
+      lines.push('  Phone: ' + p.contact.phone);
+    }
     if (p.notes) {
       lines.push('');
       lines.push('PRODUCTION NOTES');
@@ -603,6 +636,7 @@
           ['Name', p.contact.name],
           ['Brand / company', p.contact.company],
           ['Email', p.contact.email],
+          ['Phone', p.contact.phone || null],
           ['Production notes', p.notes || null]
         ]
       }
@@ -798,14 +832,38 @@
       body: JSON.stringify(p)
     }).then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json().catch(function () { return {}; });
+      // Do NOT swallow a parse failure into {}. An Apps Script deployment whose
+      // access is not set to "Anyone" answers 200 with an HTML authorisation
+      // page; res.json() then throws, {} has no `status`, and the old check —
+      // which only rejected status === 'error' — read that as success and told
+      // the visitor their specification had been saved. It had not.
+      return res.text().then(function (body) {
+        try { return JSON.parse(body); }
+        catch (e) { throw new Error('endpoint did not return JSON'); }
+      });
     }).then(function (data) {
-      if (data && data.status === 'error') {
-        throw new Error(data.message || 'Server reported error');
+      // Positive confirmation only: the script must actually say "success".
+      // Absence of an error is not evidence that anything was stored.
+      if (!data || data.status !== 'success') {
+        throw new Error((data && data.message) || 'endpoint did not confirm the save');
       }
-      renderSuccessState(p, (data && data.reference) || p.reference);
+      var finalRef = (data && data.reference) || p.reference;
+      renderSuccessState(p, finalRef);
       reveal(resultSection);
       setStatus(submitStatus, 'Specification saved to Google Sheet successfully.', false);
+
+      // Launch Luxury Animated Popup Modal for Measurements
+      showMeasurementSuccessModal({
+        eyebrow: 'TECH-PACK CONFIRMED',
+        title: 'SPECIFICATIONS SUBMITTED.',
+        name: p.contact ? p.contact.name : '',
+        company: p.contact ? p.contact.company : '',
+        email: p.contact ? p.contact.email : '',
+        phone: p.contact ? p.contact.phone : '',
+        garment: (p.garmentType || 'Garment') + (p.size ? (' (' + p.size + ')') : ''),
+        reference: finalRef,
+        ctaText: 'REVIEW TECH-PACK'
+      });
     }).catch(function (err) {
       setStatus(submitStatus, 'Could not save directly to Google Sheets (' + err.message +
         '). Please use the delivery options below to share your specification.', true);
@@ -814,6 +872,93 @@
     }).finally(function () {
       submitBtn.disabled = false;
     });
+  }
+
+  function showMeasurementSuccessModal(data) {
+    var existing = document.getElementById('roots-success-modal');
+    if (existing) existing.remove();
+
+    var backdrop = document.createElement('div');
+    backdrop.className = 'roots-modal-backdrop';
+    backdrop.id = 'roots-success-modal';
+    backdrop.setAttribute('role', 'dialog');
+    backdrop.setAttribute('aria-modal', 'true');
+    backdrop.setAttribute('aria-labelledby', 'roots-modal-title');
+
+    var summaryRows = [];
+    if (data.reference) summaryRows.push(['Specification Ref', data.reference]);
+    if (data.company) summaryRows.push(['Brand / Company', data.company]);
+    if (data.garment) summaryRows.push(['Garment Spec', data.garment]);
+    if (data.email) summaryRows.push(['Email Contact', data.email]);
+    if (data.phone) summaryRows.push(['Phone Number', data.phone]);
+
+    var summaryHtml = summaryRows.length ? 
+      '<div class="roots-modal-summary">' +
+        summaryRows.map(function (row) {
+          return '<div class="roots-modal-summary-row">' +
+            '<span class="roots-modal-summary-label">' + row[0] + '</span>' +
+            '<span class="roots-modal-summary-val">' + row[1] + '</span>' +
+          '</div>';
+        }).join('') +
+      '</div>' : '';
+
+    var desc = 'Thank you' + (data.name ? ', <strong>' + data.name + '</strong>' : '') + 
+      '. Your custom garment measurements' + (data.company ? ' for <strong>' + data.company + '</strong>' : '') + 
+      ' have been received and saved directly to the ROOTS production schedule. Our pattern masters will review the specs and reach out shortly.';
+
+    backdrop.innerHTML =
+      '<div class="roots-modal-card">' +
+        '<button type="button" class="roots-modal-close" id="roots-modal-close" aria-label="Close dialog">&times;</button>' +
+        '<div class="roots-modal-icon-wrap">' +
+          '<div class="roots-modal-ring"></div>' +
+          '<svg class="roots-modal-check" viewBox="0 0 52 52" aria-hidden="true">' +
+            '<circle class="roots-check-circle" cx="26" cy="26" r="24" fill="none"/>' +
+            '<path class="roots-check-path" fill="none" d="M14.5 26.5l8 8 16-16"/>' +
+          '</svg>' +
+        '</div>' +
+        '<p class="roots-modal-eyebrow">' + (data.eyebrow || 'TECH-PACK CONFIRMED') + '</p>' +
+        '<h3 class="roots-modal-title" id="roots-modal-title">' + (data.title || 'SPECIFICATIONS SUBMITTED.') + '</h3>' +
+        '<p class="roots-modal-desc">' + desc + '</p>' +
+        summaryHtml +
+        '<div class="roots-modal-actions">' +
+          '<button type="button" class="roots-modal-btn-primary" id="roots-modal-dismiss">' +
+            (data.ctaText || 'VIEW SUMMARY') + ' <span aria-hidden="true">&rarr;</span>' +
+          '</button>' +
+          '<a href="https://wa.me/918296376673?text=Hello%20ROOTS%2C%20I%20just%20submitted%20garment%20specifications%20with%20reference%20' + (data.reference || '') + '%20and%20would%20like%20to%20discuss%20sampling." target="_blank" rel="noopener noreferrer" class="roots-modal-btn-secondary">' +
+            'Chat with Team on WhatsApp &rarr;' +
+          '</a>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(backdrop);
+
+    requestAnimationFrame(function () {
+      backdrop.classList.add('is-active');
+      var btn = backdrop.querySelector('#roots-modal-dismiss');
+      if (btn) btn.focus();
+    });
+
+    var close = function () {
+      backdrop.classList.remove('is-active');
+      setTimeout(function () { backdrop.remove(); }, 400);
+    };
+
+    var closeBtn = backdrop.querySelector('#roots-modal-close');
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    var dismissBtn = backdrop.querySelector('#roots-modal-dismiss');
+    if (dismissBtn) dismissBtn.addEventListener('click', close);
+
+    backdrop.addEventListener('click', function (ev) {
+      if (ev.target === backdrop) close();
+    });
+
+    var onKeyDown = function (ev) {
+      if (ev.key === 'Escape') {
+        close();
+        document.removeEventListener('keydown', onKeyDown);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
   }
 
   /* =======================================================================

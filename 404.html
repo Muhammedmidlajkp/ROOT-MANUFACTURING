@@ -15,11 +15,13 @@
   <link rel="manifest" href="site.webmanifest">
 
   <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
-    rel="stylesheet">
+  <!-- The two faces painted above the fold on every page. Declared inside
+       style.css via @font-face, so without these they are not discovered until
+       the stylesheet has been fetched and parsed. -->
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="assets/fonts/cormorant-garamond-500-latin.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="assets/fonts/dm-sans-variable-latin.woff2">
 
   <link rel="stylesheet" href="css/style.css">
 

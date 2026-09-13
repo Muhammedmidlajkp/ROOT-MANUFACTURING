@@ -797,18 +797,48 @@
       const nameInput = form.querySelector('[name="name"]');
       const companyInput = form.querySelector('[name="company"]');
       const emailInput = form.querySelector('[name="email"]');
+      const phoneInput = form.querySelector('[name="phone"]');
+      const locationInput = form.querySelector('[name="location"]');
+      const manufactureInput = form.querySelector('[name="manufacture"]');
+      const messageInput = form.querySelector('[name="message"]');
+      const customSelectTrigger = document.getElementById('custom-manufacture-trigger');
 
       clearInvalid();
 
-      const empty = [nameInput, companyInput, emailInput].filter((el) => !el?.value.trim());
-      if (empty.length) {
-        fail('Please fill in all required fields (Name, Company, Email).', empty);
-        return;
+      // Check all required important fields
+      const errors = [];
+
+      if (!nameInput?.value.trim()) {
+        errors.push({ el: nameInput, msg: 'Please enter your full name.' });
+      }
+      if (!companyInput?.value.trim()) {
+        errors.push({ el: companyInput, msg: 'Please enter your brand or company name.' });
+      }
+      if (!emailInput?.value.trim()) {
+        errors.push({ el: emailInput, msg: 'Please enter your email address.' });
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())) {
+        errors.push({ el: emailInput, msg: 'Please enter a valid email address (e.g. name@brand.com).' });
+      }
+      if (!phoneInput?.value.trim()) {
+        errors.push({ el: phoneInput, msg: 'Please enter your phone or WhatsApp number.' });
+      } else if (phoneInput.value.trim().replace(/\D/g, '').length < 7) {
+        errors.push({ el: phoneInput, msg: 'Please enter a valid phone number with at least 7 digits.' });
+      }
+      if (!locationInput?.value.trim()) {
+        errors.push({ el: locationInput, msg: 'Please enter your location or city.' });
+      }
+      if (!manufactureInput?.value.trim()) {
+        errors.push({ el: customSelectTrigger || manufactureInput, msg: 'Please select what you are looking to manufacture from the dropdown.' });
+      }
+      if (!messageInput?.value.trim()) {
+        errors.push({ el: messageInput, msg: 'Please provide details about your project, order quantities, or fabrics.' });
+      } else if (messageInput.value.trim().length < 5) {
+        errors.push({ el: messageInput, msg: 'Please provide a little more detail in your project description (at least 5 characters).' });
       }
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailInput.value.trim())) {
-        fail('Please enter a valid email address, for example name@brand.com.', [emailInput]);
+      if (errors.length > 0) {
+        const first = errors[0];
+        fail(first.msg, errors.map((err) => err.el));
         return;
       }
 
@@ -882,23 +912,6 @@
           submitBtn.innerHTML = 'SENDING ENQUIRY... <span aria-hidden="true">⏳</span>';
         }
 
-        // Prepare URL-encoded form data
-        // The endpoint's reply must be READ before anything is claimed.
-        //
-        // This previously posted with `mode: 'no-cors'`. An opaque response
-        // resolves successfully whatever the server did — 500, 404, a revoked
-        // deployment, an un-authorised script — because the browser refuses to
-        // let the page see it. The code then announced "Enquiry received
-        // successfully … recorded in our production schedule" and called
-        // form.reset(), so a failed submission looked exactly like a delivered
-        // one and the visitor's enquiry was wiped. That is the lead-destroying
-        // false confirmation this handler was rewritten to remove.
-        //
-        // google-apps-script.js answers {status:'success'|'error'} as JSON, so
-        // a real confirmation is available. Content-Type text/plain keeps the
-        // request "simple" so the browser sends no CORS preflight — Apps Script
-        // serves no OPTIONS handler — and doPost already falls back to parsing
-        // e.postData.contents as JSON when e.parameter is empty.
         const payload = {};
         new FormData(form).forEach((value, key) => { payload[key] = value; });
 
@@ -930,8 +943,31 @@
           '. We have your enquiry and a ROOTS representative will reply to ' + get('email') + ' shortly.';
         statusEl.appendChild(successMsg);
 
-        // Safe to clear: the enquiry is on the server, not only on this screen.
+        // Store details for modal before reset
+        const submittedData = {
+          name: get('name'),
+          company: get('company'),
+          email: get('email'),
+          phone: get('phone'),
+          category: get('manufacture'),
+          reference: result && result.reference ? result.reference : ('ROOTS-INQ-' + new Date().getFullYear() + String(new Date().getMonth() + 1).padStart(2, '0') + String(new Date().getDate()).padStart(2, '0'))
+        };
+
+        // Safe to clear form
         form.reset();
+
+        // Launch Luxury Animated Popup Modal!
+        showSubmissionSuccessModal({
+          eyebrow: '10 / INQUIRY RECEIVED',
+          title: 'ENQUIRY SUBMITTED.',
+          name: submittedData.name,
+          company: submittedData.company,
+          email: submittedData.email,
+          phone: submittedData.phone,
+          category: submittedData.category,
+          reference: submittedData.reference,
+          ctaText: 'CONTINUE BROWSING'
+        });
 
       } catch (err) {
         // On network or transmission failure, provide instant fallback to email
@@ -947,6 +983,108 @@
       }
     });
   }
+
+  // ------------------------------------------------------------------------
+  // 7a. Luxury Submission Success Animated Popup Modal
+  // ------------------------------------------------------------------------
+  function showSubmissionSuccessModal({
+    eyebrow = 'TRANSMISSION CONFIRMED',
+    title = 'ENQUIRY RECEIVED',
+    name = '',
+    company = '',
+    email = '',
+    phone = '',
+    category = '',
+    reference = '',
+    customMessage = '',
+    ctaText = 'CONTINUE BROWSING'
+  } = {}) {
+    const existing = document.getElementById('roots-success-modal');
+    if (existing) existing.remove();
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'roots-modal-backdrop';
+    backdrop.id = 'roots-success-modal';
+    backdrop.setAttribute('role', 'dialog');
+    backdrop.setAttribute('aria-modal', 'true');
+    backdrop.setAttribute('aria-labelledby', 'roots-modal-title');
+
+    const summaryRows = [];
+    if (reference) summaryRows.push(['Reference ID', reference]);
+    if (company) summaryRows.push(['Brand / Company', company]);
+    if (category) summaryRows.push(['Apparel Category', category]);
+    if (email) summaryRows.push(['Reply To', email]);
+    if (phone) summaryRows.push(['Contact Phone', phone]);
+
+    const summaryHtml = summaryRows.length ? `
+      <div class="roots-modal-summary">
+        ${summaryRows.map(([label, val]) => `
+          <div class="roots-modal-summary-row">
+            <span class="roots-modal-summary-label">${label}</span>
+            <span class="roots-modal-summary-val">${val}</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
+
+    const defaultDesc = customMessage || (
+      `Thank you${name ? ', <strong>' + name + '</strong>' : ''}. Your submission${company ? ' for <strong>' + company + '</strong>' : ''} has been recorded and transmitted directly to our production floor. A ROOTS representative will review your technical requirements and contact you via email shortly.`
+    );
+
+    backdrop.innerHTML = `
+      <div class="roots-modal-card">
+        <button type="button" class="roots-modal-close" id="roots-modal-close" aria-label="Close dialog">&times;</button>
+        <div class="roots-modal-icon-wrap">
+          <div class="roots-modal-ring"></div>
+          <svg class="roots-modal-check" viewBox="0 0 52 52" aria-hidden="true">
+            <circle class="roots-check-circle" cx="26" cy="26" r="24" fill="none"/>
+            <path class="roots-check-path" fill="none" d="M14.5 26.5l8 8 16-16"/>
+          </svg>
+        </div>
+        <p class="roots-modal-eyebrow">${eyebrow}</p>
+        <h3 class="roots-modal-title" id="roots-modal-title">${title}</h3>
+        <p class="roots-modal-desc">${defaultDesc}</p>
+        ${summaryHtml}
+        <div class="roots-modal-actions">
+          <button type="button" class="roots-modal-btn-primary" id="roots-modal-dismiss">
+            ${ctaText} <span aria-hidden="true">&rarr;</span>
+          </button>
+          <a href="https://wa.me/918296376673?text=Hello%20ROOTS%2C%20I%20just%20submitted%20an%20enquiry%20${reference ? 'with%20reference%20' + reference : ''}%20and%20would%20like%20to%20discuss%20our%20apparel%20manufacturing." target="_blank" rel="noopener noreferrer" class="roots-modal-btn-secondary">
+            Chat with Team on WhatsApp &rarr;
+          </a>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(backdrop);
+
+    requestAnimationFrame(() => {
+      backdrop.classList.add('is-active');
+      const btn = backdrop.querySelector('#roots-modal-dismiss');
+      if (btn) btn.focus();
+    });
+
+    const close = () => {
+      backdrop.classList.remove('is-active');
+      setTimeout(() => backdrop.remove(), 400);
+    };
+
+    backdrop.querySelector('#roots-modal-close')?.addEventListener('click', close);
+    backdrop.querySelector('#roots-modal-dismiss')?.addEventListener('click', close);
+
+    backdrop.addEventListener('click', (ev) => {
+      if (ev.target === backdrop) close();
+    });
+
+    const onKeyDown = (ev) => {
+      if (ev.key === 'Escape') {
+        close();
+        document.removeEventListener('keydown', onKeyDown);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+  }
+
 
   // ------------------------------------------------------------------------
   // 8. Luxury Custom Select Component

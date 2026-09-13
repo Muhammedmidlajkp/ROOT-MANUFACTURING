@@ -52,14 +52,6 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
-
-  <!-- Google Fonts Preconnect & Optimized Weights -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
-    rel="stylesheet">
-
   <!-- The loader mark is the first thing painted, so it is fetched ahead of
        the stylesheet. 31KB indexed PNG. -->
   <link rel="preload" as="image" href="assets/images/brand/roots-logo-mark.png" fetchpriority="high">
@@ -72,6 +64,14 @@
     fetchpriority="high" media="(min-width: 801px)">
   <link rel="preload" as="image" href="assets/images/hero/roots-hero-craftsmanship-mobile.webp" type="image/webp"
     fetchpriority="high" media="(max-width: 800px)">
+
+  <!-- The two faces painted above the fold on every page. Declared inside
+       style.css via @font-face, so without these they are not discovered until
+       the stylesheet has been fetched and parsed. -->
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="assets/fonts/cormorant-garamond-500-latin.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="assets/fonts/dm-sans-variable-latin.woff2">
 
   <!-- Core Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
@@ -876,27 +876,27 @@
             </label>
 
             <label for="contact-phone">
-              PHONE NUMBER
-              <input id="contact-phone" type="tel" name="phone" autocomplete="tel" placeholder="+91 98765 43210">
+              PHONE NUMBER *
+              <input id="contact-phone" required type="tel" name="phone" autocomplete="tel" placeholder="+91 98765 43210">
             </label>
           </div>
 
           <div class="form-row">
             <label for="contact-location">
-              LOCATION / CITY
-              <input id="contact-location" name="location" type="text" autocomplete="address-level2"
+              LOCATION / CITY *
+              <input id="contact-location" required name="location" type="text" autocomplete="address-level2"
                 placeholder="e.g. Bangalore, Mumbai, London, Dubai">
             </label>
 
             <label for="contact-gst">
-              GST NUMBER
+              GST NUMBER (OPTIONAL)
               <input id="contact-gst" name="gst" type="text"
                 placeholder="e.g. 29AAAAA0000A1Z5 (Optional)">
             </label>
           </div>
 
           <div class="contact-field">
-            <span class="contact-field-label" id="contact-manufacture-label">WHAT ARE YOU LOOKING TO MANUFACTURE?</span>
+            <span class="contact-field-label" id="contact-manufacture-label">WHAT ARE YOU LOOKING TO MANUFACTURE? *</span>
             <div class="custom-select" id="custom-manufacture-wrap">
               <button type="button" class="custom-select-trigger" id="custom-manufacture-trigger"
                 aria-haspopup="listbox" aria-expanded="false" aria-labelledby="contact-manufacture-label custom-manufacture-trigger">
@@ -972,7 +972,7 @@
               </ul>
 
               <!-- Native select remains in DOM for FormData / Google Sheets submission -->
-              <select id="contact-manufacture" name="manufacture" tabindex="-1" aria-hidden="true" class="sr-only-select">
+              <select id="contact-manufacture" name="manufacture" required tabindex="-1" aria-hidden="true" class="sr-only-select">
                 <option value="" selected>Select apparel category...</option>
                 <option value="Men's Denim & Jeans">Men's Denim & Jeans</option>
                 <option value="Linen Shirts & Trousers">Linen Shirts & Trousers</option>
@@ -986,9 +986,9 @@
           </div>
 
           <label for="contact-message">
-            PROJECT DETAILS / MESSAGE
-            <textarea id="contact-message" name="message" rows="4"
-              placeholder="Tell us about your brand, requirements, timelines, or specifications..."></textarea>
+            PROJECT DETAILS / MESSAGE *
+            <textarea id="contact-message" required name="message" rows="4"
+              placeholder="Tell us about your brand, requirements, quantities, or timelines..."></textarea>
           </label>
 
           <button class="button button-dark" type="submit">SEND ENQUIRY <span aria-hidden="true">→</span></button>

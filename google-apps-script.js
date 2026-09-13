@@ -69,6 +69,7 @@ function doPost(e) {
         'Client Name',
         'Brand / Company',
         'Email Address',
+        'Phone Number',
         'Garment Type',
         'Style Reference',
         'Size Label',
@@ -98,6 +99,7 @@ function doPost(e) {
       var clientName = contact.name || p.name || 'N/A';
       var clientCompany = contact.company || p.company || 'N/A';
       var clientEmail = contact.email || p.email || 'N/A';
+      var clientPhone = contact.phone || p.phone || 'N/A';
       var unit = p.unit || 'cm';
       var m = p.measurements || {};
       var ref = p.reference || ('ROOTS-MS-' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd-HHmmss'));
@@ -108,6 +110,7 @@ function doPost(e) {
         clientName,
         clientCompany,
         clientEmail,
+        clientPhone,
         p.garmentType || 'N/A',
         p.styleReference || '',
         p.size || '',
@@ -186,6 +189,7 @@ function doPost(e) {
               '<tr><td style="color:#77736c;padding:4px 0;">Size Label:</td><td style="color:#1f1e1c;font-weight:600;">' + (p.size || '—') + '</td></tr>' +
               '<tr><td style="color:#77736c;padding:4px 0;">Unit of Measure:</td><td style="color:#a93435;font-weight:700;">' + (unit === 'in' ? 'Inches (in)' : 'Centimetres (cm)') + '</td></tr>' +
               '<tr><td style="color:#77736c;padding:4px 0;">Contact Email:</td><td style="color:#1f1e1c;"><a href="mailto:' + clientEmail + '" style="color:#a93435;text-decoration:none;font-weight:500;">' + clientEmail + '</a></td></tr>' +
+              '<tr><td style="color:#77736c;padding:4px 0;">Phone Number:</td><td style="color:#1f1e1c;">' + clientPhone + '</td></tr>' +
             '</table>' +
 
             // Measurements Table

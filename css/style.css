@@ -3464,3 +3464,288 @@ body:has(input:not([type="radio"]):not([type="checkbox"]):not([type="button"]):n
     transform: none !important;
   }
 }
+
+/* --------------------------------------------------------------------------
+   16. LUXURY SUBMISSION SUCCESS POPUP MODAL
+   -------------------------------------------------------------------------- */
+.roots-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-color: rgba(14, 13, 12, 0.76);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.roots-modal-backdrop.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.roots-modal-card {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 8px;
+  border: 1px solid #ded9ce;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.36),
+    0 6px 20px rgba(0, 0, 0, 0.12);
+  padding: clamp(28px, 4.5vw, 42px) clamp(24px, 4vw, 36px) clamp(24px, 3.5vw, 36px);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transform: scale(0.9) translateY(24px);
+  opacity: 0;
+  transition:
+    transform 0.46s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.roots-modal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #a93435 0%, #d45c5d 50%, #a93435 100%);
+}
+
+.roots-modal-backdrop.is-active .roots-modal-card {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.roots-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  color: #88837a;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.roots-modal-close:hover,
+.roots-modal-close:focus-visible {
+  color: #1f1e1c;
+  background-color: #f2eee6;
+  outline: none;
+}
+
+.roots-modal-icon-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.roots-modal-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(169, 52, 53, 0.25);
+  animation: rootsPulseRing 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.roots-modal-check {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: block;
+}
+
+.roots-check-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 2.5;
+  stroke: #a93435;
+  fill: rgba(169, 52, 53, 0.05);
+}
+
+.roots-check-path {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  stroke: #a93435;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.roots-modal-backdrop.is-active .roots-check-circle {
+  animation: rootsStroke 0.55s cubic-bezier(0.65, 0, 0.45, 1) forwards 0.15s;
+}
+
+.roots-modal-backdrop.is-active .roots-check-path {
+  animation: rootsStroke 0.4s cubic-bezier(0.65, 0, 0.45, 1) 0.65s forwards;
+}
+
+@keyframes rootsStroke {
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes rootsPulseRing {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  60% {
+    transform: scale(1.22);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.22);
+    opacity: 0;
+  }
+}
+
+.roots-modal-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #a93435;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+}
+
+.roots-modal-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(24px, 3.2vw, 30px);
+  color: #1f1e1c;
+  margin: 0 0 10px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.roots-modal-desc {
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: #5c5852;
+  margin: 0 0 20px;
+}
+
+.roots-modal-summary {
+  background-color: #f7f5f0;
+  border: 1px solid #e8e4dc;
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  text-align: left;
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: #33312c;
+}
+
+.roots-modal-summary-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #e8e4dc;
+  padding: 4px 0;
+}
+
+.roots-modal-summary-row:last-child {
+  border-bottom: 0;
+}
+
+.roots-modal-summary-label {
+  color: #88837a;
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.roots-modal-summary-val {
+  font-weight: 600;
+  color: #1f1e1c;
+  text-align: right;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roots-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.roots-modal-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 20px;
+  background-color: #1a1918;
+  color: #ffffff;
+  border: 0;
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.25s ease, transform 0.2s ease;
+}
+
+.roots-modal-btn-primary:hover,
+.roots-modal-btn-primary:focus-visible {
+  background-color: #a93435;
+  transform: translateY(-1px);
+}
+
+.roots-modal-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 20px;
+  background-color: #f2eee6;
+  color: #1f1e1c;
+  border: 1px solid #dcd7ce;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 3px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.roots-modal-btn-secondary:hover,
+.roots-modal-btn-secondary:focus-visible {
+  background-color: #e5e0d5;
+  border-color: #c9c3b8;
+}
+

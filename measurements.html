@@ -39,12 +39,13 @@
   <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
-    rel="stylesheet">
+  <!-- The two faces painted above the fold on every page. Declared inside
+       style.css via @font-face, so without these they are not discovered until
+       the stylesheet has been fetched and parsed. -->
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="assets/fonts/cormorant-garamond-500-latin.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="assets/fonts/dm-sans-variable-latin.woff2">
 
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/measurements.css">
@@ -433,13 +434,15 @@
 
             <div class="ms-field-row">
               <div class="ms-field">
-                <label for="ms-styleReference">Style / reference</label>
-                <input id="ms-styleReference" name="styleReference" type="text" autocomplete="off"
+                <label for="ms-styleReference">Style / reference <abbr title="required">*</abbr></label>
+                <input id="ms-styleReference" name="styleReference" type="text" autocomplete="off" required
                   placeholder="e.g. SS26-SHIRT-01">
+                <p class="ms-error" id="err-styleReference" role="alert" hidden></p>
               </div>
               <div class="ms-field">
-                <label for="ms-size">Size label</label>
-                <input id="ms-size" name="size" type="text" autocomplete="off" placeholder="e.g. M / 40">
+                <label for="ms-size">Size label <abbr title="required">*</abbr></label>
+                <input id="ms-size" name="size" type="text" autocomplete="off" required placeholder="e.g. M / 40">
+                <p class="ms-error" id="err-size" role="alert" hidden></p>
               </div>
             </div>
 
@@ -496,16 +499,24 @@
               </div>
             </div>
 
-            <div class="ms-field">
-              <label for="ms-email">Email <abbr title="required">*</abbr></label>
-              <input id="ms-email" name="email" type="email" autocomplete="email" required placeholder="name@brand.com">
-              <p class="ms-error" id="err-email" role="alert" hidden></p>
+            <div class="ms-field-row">
+              <div class="ms-field">
+                <label for="ms-email">Email <abbr title="required">*</abbr></label>
+                <input id="ms-email" name="email" type="email" autocomplete="email" required placeholder="name@brand.com">
+                <p class="ms-error" id="err-email" role="alert" hidden></p>
+              </div>
+              <div class="ms-field">
+                <label for="ms-phone">Phone / WhatsApp <abbr title="required">*</abbr></label>
+                <input id="ms-phone" name="phone" type="tel" autocomplete="tel" required placeholder="+91 98765 43210">
+                <p class="ms-error" id="err-phone" role="alert" hidden></p>
+              </div>
             </div>
 
             <div class="ms-field">
-              <label for="ms-notes">Production notes</label>
-              <textarea id="ms-notes" name="notes" rows="3"
-                placeholder="Fabric, tolerance, quantity, grading or anything else ROOTS should know."></textarea>
+              <label for="ms-notes">Production notes & requirements <abbr title="required">*</abbr></label>
+              <textarea id="ms-notes" name="notes" rows="3" required
+                placeholder="Fabric composition, order quantity, delivery timeline, or anything else ROOTS should know..."></textarea>
+              <p class="ms-error" id="err-notes" role="alert" hidden></p>
             </div>
           </fieldset>
 
