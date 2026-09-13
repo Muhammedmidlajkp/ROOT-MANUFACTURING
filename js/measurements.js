@@ -28,9 +28,8 @@
      CONFIG
      ======================================================================= */
   var CONFIG = {
-    // Set to a real POST endpoint to enable automatic submission.
-    // e.g. 'https://api.rootsbusiness.in/measurements'
-    endpoint: null,
+    // Google Sheets Webhook URL for custom garment measurements
+    endpoint: 'https://script.google.com/macros/s/AKfycbzAuIVChWKgNyISkzhc2uXSMK55eT3yduKzA5TsJ5pn-mZuQEui5FCD3e6CU3mDk6-Jpg/exec',
     recipient: 'rootsbusinessconnect@gmail.com',
     // Sanity bounds only — NOT a ROOTS specification. They exist to catch
     // typos (a stray zero), not to constrain real garment dimensions.
@@ -788,22 +787,28 @@
     }
 
     submitBtn.disabled = true;
-    setStatus(submitStatus, 'Sending specification…', false);
+    setStatus(submitStatus, 'Saving specifications to Google Sheets…', false);
+
+    // Explicitly flag as measurement submission
+    p.formType = 'measurements';
 
     fetch(CONFIG.endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(p)
     }).then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json().catch(function () { return {}; });
     }).then(function (data) {
-      renderSuccessState(p, data && data.reference);
+      if (data && data.status === 'error') {
+        throw new Error(data.message || 'Server reported error');
+      }
+      renderSuccessState(p, (data && data.reference) || p.reference);
       reveal(resultSection);
-      setStatus(submitStatus, '', false);
+      setStatus(submitStatus, 'Specification saved to Google Sheet successfully.', false);
     }).catch(function (err) {
-      setStatus(submitStatus, 'The specification could not be sent (' + err.message +
-        '). Nothing has reached ROOTS. Please try again, or email ' + CONFIG.recipient + '.', true);
+      setStatus(submitStatus, 'Could not save directly to Google Sheets (' + err.message +
+        '). Please use the delivery options below to share your specification.', true);
       renderDeliveryState(p);
       reveal(resultSection);
     }).finally(function () {

@@ -430,7 +430,15 @@
               sizes="(max-width: 800px) 88vw, 84vw"
               width="1600" height="900"
             alt="Two people reviewing handwritten notes beside a laptop" loading="lazy" decoding="async">
-          <img class="process-img is-incoming" aria-hidden="true" alt="" loading="lazy" decoding="async">
+          <!-- The second half of the crossfade. main.js assigns its src on the
+               first stage change; until then it needs one of its own, because
+               <img> requires src and an element without it is invalid HTML that
+               reports naturalWidth 0 for the life of the page. Pointing it at
+               the stage-01 file costs nothing — the active layer has already
+               fetched it, so this is a cache hit — and it is opacity 0 and
+               aria-hidden, so it is never seen or announced. -->
+          <img class="process-img is-incoming" src="assets/images/process/roots-process-01-order-1200.webp"
+            aria-hidden="true" alt="" loading="lazy" decoding="async">
         </div>
         <figcaption class="process-caption">
           <span aria-hidden="true" class="process-stage-num">01</span>
