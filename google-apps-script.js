@@ -6,10 +6,10 @@
  * Supports:
  * 1. Contact Form Inquiries (index.html#contact) -> Saved in "Inquiries" sheet tab
  * 2. Custom Garment Measurements (measurements.html) -> Saved in "Measurements" sheet tab
- * 3. Automated Luxury HTML Email Notifications to midlaj2636@gmail.com for BOTH types!
+ * 3. Automated Luxury HTML Email Notifications with official ROOTS Logo to midlaj2636@gmail.com!
  * 
  * INSTRUCTIONS TO UPDATE / SETUP:
- * 1. Open your Google Sheet (where ROOTS Inquiries is connected).
+ * 1. Open your Google Sheet.
  * 2. Click: Extensions > Apps Script.
  * 3. Replace all the code in Code.gs with this entire file.
  * 4. Click the Save button (disk icon).
@@ -50,6 +50,7 @@ function doPost(e) {
     var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm:ss');
     var formattedDate = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd MMM yyyy');
     var formattedTime = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'hh:mm a');
+    var logoUrl = 'https://raw.githubusercontent.com/Muhammedmidlajkp/ROOT-MANUFACTURING/main/assets/images/brand/roots-logo.png';
 
     var isMeasurement = (p.formType === 'measurements' || p.garmentType || p.measurements);
 
@@ -137,24 +138,24 @@ function doPost(e) {
           '<tr><td align="center">' +
           '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">' +
 
-          // Header
-          '<tr><td style="background-color:#111111;border-radius:8px 8px 0 0;padding:0;">' +
+          // Header with Logo
+          '<tr><td style="background-color:#ffffff;border-radius:8px 8px 0 0;padding:24px 32px 20px;border-bottom:2px solid #a93435;">' +
             '<table width="100%" cellpadding="0" cellspacing="0">' +
               '<tr>' +
-                '<td style="padding:28px 32px 20px;">' +
-                  '<p style="margin:0 0 4px;font-family:Georgia,serif;font-size:11px;letter-spacing:3px;color:#a8a69e;text-transform:uppercase;">Measurement Tech-Pack</p>' +
-                  '<h1 style="margin:0;font-family:Georgia,serif;font-size:26px;font-weight:400;color:#ffffff;letter-spacing:1px;line-height:1.2;">ROOTS</h1>' +
-                  '<p style="margin:2px 0 0;font-family:-apple-system,sans-serif;font-size:11px;letter-spacing:2px;color:#a8a69e;text-transform:uppercase;">Custom Garment Specification</p>' +
+                '<td style="vertical-align:middle;">' +
+                  '<a href="https://www.rootsbusiness.in" target="_blank" style="text-decoration:none;display:inline-block;">' +
+                    '<img src="' + logoUrl + '" alt="ROOTS Manufacturing" width="135" style="display:block;border:0;outline:none;height:auto;max-height:55px;" />' +
+                  '</a>' +
+                  '<p style="margin:6px 0 0;font-family:-apple-system,sans-serif;font-size:10px;letter-spacing:1.5px;color:#888888;text-transform:uppercase;">Custom Garment Tech-Pack</p>' +
                 '</td>' +
-                '<td style="padding:28px 32px 20px;text-align:right;vertical-align:top;">' +
-                  '<p style="margin:0;font-family:-apple-system,sans-serif;font-size:20px;font-weight:700;color:#ffffff;line-height:1;">' + formattedDate + '</p>' +
-                  '<p style="margin:4px 0 0;font-family:-apple-system,sans-serif;font-size:12px;color:#a8a69e;">' + formattedTime + ' IST</p>' +
-                  '<div style="margin-top:10px;display:inline-block;background-color:#a93435;border-radius:3px;padding:4px 10px;">' +
-                    '<span style="font-family:-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:#ffffff;text-transform:uppercase;">' + ref + '</span>' +
-                  '</div>' +
+                '<td style="vertical-align:middle;text-align:right;">' +
+                  '<span style="display:inline-block;background-color:#a93435;color:#ffffff;font-family:-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:3px;">' +
+                    ref +
+                  '</span>' +
+                  '<p style="margin:6px 0 0;font-family:-apple-system,sans-serif;font-size:12px;color:#444444;font-weight:600;">' + formattedDate + '</p>' +
+                  '<p style="margin:2px 0 0;font-family:-apple-system,sans-serif;font-size:11px;color:#888888;">' + formattedTime + ' IST</p>' +
                 '</td>' +
               '</tr>' +
-              '<tr><td colspan="2" style="padding:0;"><div style="height:3px;background:linear-gradient(90deg,#a93435 0%,#d45c5d 50%,#a93435 100%);"></div></td></tr>' +
             '</table>' +
           '</td></tr>' +
 
@@ -223,11 +224,11 @@ function doPost(e) {
           '</td></tr>' +
 
           // Footer
-          '<tr><td style="background-color:#111111;border-radius:0 0 8px 8px;padding:16px 32px;">' +
+          '<tr><td style="background-color:#111111;border-radius:0 0 8px 8px;padding:20px 32px;">' +
             '<table width="100%" cellpadding="0" cellspacing="0"><tr>' +
               '<td>' +
-                '<p style="margin:0;font-family:-apple-system,sans-serif;font-size:11px;color:#a8a69e;">ROOTS Apparel Manufacturing · Bangalore, India</p>' +
-                '<p style="margin:4px 0 0;font-family:-apple-system,sans-serif;font-size:11px;color:#555555;">Saved to Google Sheet [Measurements] · ' + timestamp + ' IST</p>' +
+                '<p style="margin:0;font-family:-apple-system,sans-serif;font-size:11px;color:#a8a69e;font-weight:600;">ROOTS APPAREL MANUFACTURING</p>' +
+                '<p style="margin:3px 0 0;font-family:-apple-system,sans-serif;font-size:11px;color:#666666;">Bangalore, India · Saved to Google Sheet [Measurements]</p>' +
               '</td>' +
               '<td style="text-align:right;">' +
                 '<p style="margin:0;font-family:Georgia,serif;font-size:18px;color:#a93435;font-style:italic;">Roots</p>' +
@@ -294,7 +295,7 @@ function doPost(e) {
 
     inqSheet.appendRow(row);
 
-    // Send instant email notification to midlaj2636@gmail.com
+    // Send instant email notification to midlaj2636@gmail.com with ROOTS Logo
     try {
       var recipient = 'midlaj2636@gmail.com';
       var subject = 'New ROOTS Manufacturing Inquiry: ' + (p.company || p.name || 'Website Lead');
@@ -306,24 +307,24 @@ function doPost(e) {
         '<tr><td align="center">' +
         '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">' +
 
-        // Header
-        '<tr><td style="background-color:#111111;border-radius:8px 8px 0 0;padding:0;">' +
+        // Header with ROOTS Logo
+        '<tr><td style="background-color:#ffffff;border-radius:8px 8px 0 0;padding:24px 32px 20px;border-bottom:2px solid #a93435;">' +
           '<table width="100%" cellpadding="0" cellspacing="0">' +
             '<tr>' +
-              '<td style="padding:28px 32px 20px;">' +
-                '<p style="margin:0 0 4px;font-family:Georgia,serif;font-size:11px;letter-spacing:3px;color:#a8a69e;text-transform:uppercase;">New Inquiry</p>' +
-                '<h1 style="margin:0;font-family:Georgia,serif;font-size:26px;font-weight:400;color:#ffffff;letter-spacing:1px;line-height:1.2;">ROOTS</h1>' +
-                '<p style="margin:2px 0 0;font-family:-apple-system,sans-serif;font-size:11px;letter-spacing:2px;color:#a8a69e;text-transform:uppercase;">Apparel Manufacturing</p>' +
+              '<td style="vertical-align:middle;">' +
+                '<a href="https://www.rootsbusiness.in" target="_blank" style="text-decoration:none;display:inline-block;">' +
+                  '<img src="' + logoUrl + '" alt="ROOTS Apparel Manufacturing" width="135" style="display:block;border:0;outline:none;height:auto;max-height:55px;" />' +
+                '</a>' +
+                '<p style="margin:6px 0 0;font-family:-apple-system,sans-serif;font-size:10px;letter-spacing:1.5px;color:#888888;text-transform:uppercase;">Apparel Manufacturing · Bangalore</p>' +
               '</td>' +
-              '<td style="padding:28px 32px 20px;text-align:right;vertical-align:top;">' +
-                '<p style="margin:0;font-family:-apple-system,sans-serif;font-size:20px;font-weight:700;color:#ffffff;line-height:1;">' + formattedDate + '</p>' +
-                '<p style="margin:4px 0 0;font-family:-apple-system,sans-serif;font-size:12px;color:#a8a69e;">' + formattedTime + ' IST</p>' +
-                '<div style="margin-top:10px;display:inline-block;background-color:#a93435;border-radius:3px;padding:4px 10px;">' +
-                  '<span style="font-family:-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:#ffffff;text-transform:uppercase;">New Lead</span>' +
-                '</div>' +
+              '<td style="vertical-align:middle;text-align:right;">' +
+                '<span style="display:inline-block;background-color:#111111;color:#ffffff;font-family:-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:3px;">' +
+                  'NEW INQUIRY' +
+                '</span>' +
+                '<p style="margin:6px 0 0;font-family:-apple-system,sans-serif;font-size:12px;color:#444444;font-weight:600;">' + formattedDate + '</p>' +
+                '<p style="margin:2px 0 0;font-family:-apple-system,sans-serif;font-size:11px;color:#888888;">' + formattedTime + ' IST</p>' +
               '</td>' +
             '</tr>' +
-            '<tr><td colspan="2" style="padding:0;"><div style="height:3px;background:linear-gradient(90deg,#a93435 0%,#d45c5d 50%,#a93435 100%);"></div></td></tr>' +
           '</table>' +
         '</td></tr>' +
 
@@ -402,11 +403,11 @@ function doPost(e) {
           '</tr></table>' +
         '</td></tr>' +
 
-        '<tr><td style="background-color:#111111;border-radius:0 0 8px 8px;padding:16px 32px;">' +
+        '<tr><td style="background-color:#111111;border-radius:0 0 8px 8px;padding:20px 32px;">' +
           '<table width="100%" cellpadding="0" cellspacing="0"><tr>' +
             '<td>' +
-              '<p style="margin:0;font-family:-apple-system,sans-serif;font-size:11px;color:#a8a69e;">ROOTS Apparel Manufacturing · Bangalore, India</p>' +
-              '<p style="margin:4px 0 0;font-family:-apple-system,sans-serif;font-size:11px;color:#555555;">Received ' + timestamp + ' IST · Saved to Google Sheet</p>' +
+              '<p style="margin:0;font-family:-apple-system,sans-serif;font-size:11px;color:#a8a69e;font-weight:600;">ROOTS APPAREL MANUFACTURING</p>' +
+              '<p style="margin:3px 0 0;font-family:-apple-system,sans-serif;font-size:11px;color:#666666;">Bangalore, Karnataka, India · Saved to Google Sheet</p>' +
             '</td>' +
             '<td style="text-align:right;">' +
               '<p style="margin:0;font-family:Georgia,serif;font-size:18px;color:#a93435;font-style:italic;">Roots</p>' +
