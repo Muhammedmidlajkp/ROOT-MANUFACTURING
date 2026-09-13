@@ -6,12 +6,22 @@ Handover notes for the site's images. Nothing here is loaded by the website.
 
 | Folder | Deployed? | Contents |
 |---|---|---|
-| `assets/images/` | **Yes** | Everything the live site loads |
-| `assets/masters/` | **No — exclude from deploy** | Full-resolution sources and unused icon variants |
+| `assets/images/` | **Yes** | Everything the live site loads — 1.1 MB |
+| `assets/masters/` | **No — exclude from deploy** | Full-resolution sources and icon variants |
+| `assets/masters/source/` | **No — exclude from deploy** | Untouched client drops, before any processing |
 
 `assets/masters/` exists so the originals are never lost when a served asset is
-optimised. It must not be uploaded: it is ~2.3 MB of source material the
-browser never needs.
+optimised. It must not be uploaded: it is ~14 MB of source material the browser
+never needs.
+
+`assets/masters/source/` holds the ten files that used to sit loose in the web
+root (`CARGOS NEW.png`, `HERO IMG.png`, `KIDS NEW.png`, `LINEN NEW.png`,
+`ROOTS FAV.png`, `ROOTS LOGO.jpeg`, `KIDS.jpeg`, `cargos.jpeg`,
+`manufactering img.jpeg`, `mens linen.jpeg`). They are the originals the served
+images were derived from — 9.6 MB that a static host would otherwise have
+published at the site root. Nothing references them at runtime. The one-shot
+processing scripts in `scratch/` still name them by their old root paths and
+would need the new prefix if they are ever re-run.
 
 ## ROOTS-owned assets currently served
 
@@ -23,8 +33,10 @@ browser never needs.
 | `images/roots-hero-craftsmanship-mobile.webp` | 75 KB | Homepage hero, ≤800px |
 | `../favicon.ico` | 2.15 KB | Tabs and bookmarks — 16, 32 and 48px in one file |
 | `../favicon-32.png` | 0.68 KB | Tab icon for browsers that prefer PNG (32×32) |
-| `../favicon-180.png` | 5.74 KB | High-res icon / Apple touch icon (180×180) |
 | `../apple-touch-icon.png` | 5.74 KB | Apple touch icon (180×180) |
+
+`favicon-180.png` was removed: it was byte-identical to `apple-touch-icon.png`
+and referenced by nothing but this table.
 
 ### Favicons — optimized technical rasterization
 
@@ -74,17 +86,19 @@ saves 45%. 1080px wide, which is exactly 1:1 at the loader's 540px cap on a
 2× display. If the artwork is ever re-cut, regenerate at 1080px rather than
 scaling this file.
 
-### The two favicons are 1.1 MB between them
+### The oversized brand exports are masters, and are not served
 
-`favicon.svg` (629 KB) is a 128×128 SVG wrapping a base64 **912×713** PNG, and
-`favicon.png` (472 KB) is that same 912×713 raster. Both are fetched on first
-load, where they render at 16–180px. Together they are ~78% of the homepage's
-same-origin transfer and four times the hero photograph.
+`masters/favicon-wordmark-full.svg` (629 KB) is a 128×128 SVG wrapping a base64
+**912×713** PNG, and `masters/icon-variants/favicon.png` (472 KB) is that same
+912×713 raster. They are client-supplied brand exports, kept as sources and
+**not fetched by any page** — the served favicons are the small optimised files
+in the table above (~14 KB total). Re-exporting them at display resolution would
+shrink the repository but changes nothing a visitor downloads.
 
-They were 1.6 KB and 11 KB when this file was first written. Re-exporting at
-display resolution — 128px for the SVG payload, 180px for the apple-touch
-icon — restores roughly a megabyte on every cold visit. Left as found: these
-are client-supplied brand exports, not generated assets.
+Three byte-identical copies were removed from `masters/icon-variants/`:
+`apple-icon.png` and `favicon-white.png` (both the same bytes as
+`masters/favicon-wordmark-912x713.png`) and `icon.svg` (the same bytes as
+`masters/favicon-wordmark-full.svg`). One canonical copy of each remains.
 
 **The hero photograph is flagged TEMPORARY** in `index.html` and `css/style.css`.
 It is 1376px wide, so it upscales on displays above that, and its JPEG master
@@ -93,21 +107,25 @@ real ROOTS photography is the single highest-value asset change available.
 Target: a 2560–2880px WebP for desktop plus a separately composed portrait crop
 for phones.
 
-## External photography — 18 placements, 17 distinct photos, all Unsplash
+## External photography — 16 distinct photos, all Unsplash
 
 None are ROOTS-owned. All are hotlinked, so they remain an availability
 dependency and an unverified commercial-licensing question.
 
-### Status, checked 2026-09-06
+### Status, checked 2026-09-12
 
-All 18 placements returned 200 and rendered correctly. Every one is
+All 16 returned 200 and rendered correctly. Counted directly from source:
+six ids in `index.html` (the MEN'S DENIM tile, the process panel and the four
+material figures), nine in the `processStages` array in `js/main.js`, and two
+CSS backgrounds in `css/style.css` (`--img-quality`, `--img-closing`); stage 01
+appears in both `index.html` and `js/main.js`. Every one is
 **temporary** — topically truthful stock standing in for photography ROOTS does
 not yet own. None has a local replacement. See the replacement priority below.
 
 Two things worth recording:
 
 - **The availability risk is real, not theoretical.** During the previous audit
-  the machine briefly lost its connection and all 18 images failed at once while
+  the machine briefly lost its connection and every one of them failed at once while
   the rest of the site rendered normally. That is exactly what a visitor on a
   poor connection, a restricted corporate network, or a region that blocks the
   CDN would see. Hosting these locally is the fix, and it also settles the

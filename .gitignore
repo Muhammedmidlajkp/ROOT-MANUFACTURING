@@ -13,3 +13,6 @@ __v0_jsx-dev-runtime.ts
 node_modules
 .next/
 .DS_Store
+# Local audit / image-processing scripts and their intermediate output.
+# Not part of the deployed site.
+scratch/

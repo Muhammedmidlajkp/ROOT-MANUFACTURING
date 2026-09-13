@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Page Not Found (404) | ROOTS Apparel Manufacturing</title>
+  <meta name="robots" content="noindex, follow">
+
+  <!-- Favicons -->
+  <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    .error-hero {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-section) var(--page-gutter);
+      background-color: var(--roots-ivory);
+      text-align: center;
+    }
+
+    .error-card {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .error-kicker {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--roots-red);
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .error-title {
+      font-size: clamp(3.2rem, 7.5vw, 6.5rem);
+      line-height: 0.95;
+      margin-bottom: 28px;
+    }
+
+    .error-desc {
+      font-size: clamp(15px, 1.2vw, 18px);
+      color: var(--roots-text-muted);
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    .error-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="site-header scrolled" role="banner">
+    <a href="index.html" class="brand-mark" aria-label="ROOTS Manufacturing Homepage">
+      <img src="assets/images/roots-logo.png" alt="ROOTS Logo" width="480" height="320">
+    </a>
+
+    <nav aria-label="Primary Navigation">
+      <a href="index.html#about">ABOUT</a>
+      <a href="index.html#capabilities">CAPABILITIES</a>
+      <a href="index.html#process">PROCESS</a>
+      <a href="index.html#focus">FOCUS</a>
+      <a href="measurements.html">MEASUREMENTS</a>
+      <a href="index.html#contact">CONTACT</a>
+    </nav>
+
+    <a class="nav-cta" href="index.html#contact">
+      REQUEST A QUOTE <span aria-hidden="true">→</span>
+    </a>
+
+    <!-- The shared stylesheet hides .site-header nav and .nav-cta below 1081px
+         on the assumption that a hamburger reveals the drawer. Without these
+         two blocks this page's header collapsed to just the logo on every
+         phone and tablet, leaving no navigation at all. -->
+    <button class="mobile-menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false"
+      aria-controls="mobile-drawer">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <div class="mobile-nav-drawer" id="mobile-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation"
+    aria-hidden="true">
+    <nav>
+      <a href="index.html#about">ABOUT</a>
+      <a href="index.html#capabilities">CAPABILITIES</a>
+      <a href="index.html#process">PROCESS</a>
+      <a href="index.html#focus">FOCUS</a>
+      <a href="measurements.html">MEASUREMENTS</a>
+      <a href="index.html#contact">CONTACT</a>
+    </nav>
+    <div class="mobile-nav-footer">
+      <a class="button button-light" href="index.html#contact">REQUEST A QUOTE <span aria-hidden="true">→</span></a>
+      <a class="talk" href="mailto:rootsbusinessconnect@gmail.com">rootsbusinessconnect@gmail.com</a>
+    </div>
+  </div>
+
+  <noscript>
+    <style>
+      /* The drawer needs main.js. Without it the toggle is a dead control, so
+         drop it — the in-page RETURN TO HOMEPAGE button is the route back. */
+      .mobile-menu-toggle { display: none !important; }
+    </style>
+  </noscript>
+
+  <main role="main">
+    <section class="error-hero" aria-labelledby="error-heading">
+      <div class="error-card">
+        <p class="error-kicker">404 / ERROR</p>
+        <h1 class="error-title" id="error-heading">PAGE <em>NOT FOUND.</em></h1>
+        <p class="error-desc">
+          The page or specification you requested does not exist, has moved, or is temporarily unavailable. Return to the homepage or explore our custom garment measurement specifications.
+        </p>
+        <div class="error-actions">
+          <a class="button button-dark" href="index.html">RETURN TO HOMEPAGE <span aria-hidden="true">→</span></a>
+          <a class="button" href="measurements.html">CUSTOM MEASUREMENTS <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="assets/images/roots-logo.png" alt="ROOTS Apparel Logo" width="480" height="320">
+        <p>THE ENGINE BEHIND THE BRANDS</p>
+      </div>
+
+      <nav aria-label="Footer Navigation">
+        <a href="index.html#about">ABOUT</a>
+        <a href="index.html#capabilities">CAPABILITIES</a>
+        <a href="index.html#process">PROCESS</a>
+        <a href="index.html#focus">FOCUS</a>
+        <a href="measurements.html">CUSTOM MEASUREMENTS</a>
+        <a href="index.html#contact">CONTACT</a>
+      </nav>
+
+      <address class="footer-contact">
+        <a href="mailto:rootsbusinessconnect@gmail.com">rootsbusinessconnect@gmail.com</a>
+        <a href="tel:+918296376673">+91 82963 76673</a>
+        <span>Bangalore, Karnataka, India</span>
+      </address>
+    </div>
+
+    <div class="footer-bottom">
+      <span>&copy; 2026 ROOTS MANUFACTURING — ALL RIGHTS RESERVED</span>
+      <span>BUILT FOR BRANDS. MADE WITH PRECISION.</span>
+    </div>
+  </footer>
+
+  <!-- Drives the drawer above. Every other initialiser returns early on this
+       page because the elements it looks for are not here. -->
+  <script src="js/main.js" defer></script>
+</body>
+
+</html>

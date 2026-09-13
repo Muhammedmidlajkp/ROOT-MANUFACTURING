@@ -73,6 +73,56 @@
 
   <!-- Core Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
+  <!-- Without JavaScript the page must still read as a finished document, not a
+       broken one. Each rule below undoes a collapse that only main.js can open,
+       or removes a control that can no longer do anything.
+
+       The capability rules previously targeted `.capability-panel[hidden]`, an
+       attribute no panel in this document carries. The panels are collapsed by
+       `grid-template-rows: 0fr` + `visibility: hidden` (style.css section 11)
+       and their inner block by `opacity: 0`, so the old selector matched
+       nothing and all six descriptions stayed unreadable. -->
+  <noscript>
+    <style>
+      .roots-loader-overlay { display: none !important; }
+
+      /* Capability accordion: open and keep open. */
+      .capability-panel {
+        grid-template-rows: 1fr !important;
+        visibility: visible !important;
+        transition: none !important;
+      }
+      .capability-panel-inner {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+      .capability-trigger { cursor: default; }
+      .capability-trigger .row-arrow { display: none; }
+
+      /* Process: only stage 01 is in the served HTML, so the other eight tabs
+         cannot change anything. Show them as unavailable rather than broken. */
+      .timeline button:not(.active) { opacity: 0.4; pointer-events: none; }
+
+      /* The drawer cannot be opened, and the header nav it replaces is hidden
+         on phones — so remove the dead control rather than offer it. */
+      .mobile-menu-toggle { display: none !important; }
+
+      /* The enquiry form cannot be validated or handed to a mail client, and
+         submitting it would reload the page and discard everything typed. */
+      .contact form button[type="submit"] { display: none !important; }
+      .contact form::after {
+        content: "This form needs JavaScript. Please email rootsbusinessconnect@gmail.com or call +91 82963 76673 and we will reply the same working day.";
+        display: block;
+        margin-top: 20px;
+        padding: 16px 18px;
+        border: 1px solid var(--roots-line);
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--roots-text-muted);
+      }
+    </style>
+  </noscript>
 
   <!-- Schema.org JSON-LD Structured Data for Rich Snippets -->
   <script type="application/ld+json">
@@ -89,7 +139,7 @@
         "logo": "https://www.rootsbusiness.in/assets/images/roots-logo.png",
         "image": "https://www.rootsbusiness.in/assets/images/roots-hero-craftsmanship.webp",
         "description": "ROOTS is a premium apparel manufacturing partner based in Bangalore, India, specializing in menswear, kidswear, cargos, denim and linen, providing end-to-end solutions from design and sourcing to final production.",
-        "telephone": "+9118296376673",
+        "telephone": "+918296376673",
         "email": "rootsbusinessconnect@gmail.com",
         "address": {
           "@type": "PostalAddress",
@@ -193,20 +243,20 @@
   <!-- Header & Navigation -->
   <header class="site-header" role="banner">
     <a href="#top" class="brand-mark" aria-label="ROOTS Manufacturing Homepage">
-      <img src="assets/images/roots-logo.png" alt="ROOTS — The Engine Behind The Brands Logo" width="140" height="48">
+      <img src="assets/images/roots-logo.png" alt="ROOTS — The Engine Behind The Brands Logo" width="480" height="320">
     </a>
 
     <nav aria-label="Primary Navigation">
       <a href="#about" title="About ROOTS">ABOUT</a>
       <a href="#capabilities" title="Manufacturing Capabilities">CAPABILITIES</a>
-      <a href="#process" title="Our 6-Step Manufacturing Process">PROCESS</a>
+      <a href="#process" title="Our 9-Stage Manufacturing Workflow">PROCESS</a>
       <a href="#focus" title="Product Focus Categories">FOCUS</a>
-      <a href="#contact" title="Get in touch to start a partnership">CONTACT</a>
       <a href="measurements.html" title="Custom Garment Measurements & Tech Specs">MEASUREMENTS</a>
+      <a href="#contact" title="Get in touch to request a quote">CONTACT</a>
     </nav>
 
-    <a class="nav-cta" href="#contact" title="Inquire about manufacturing partnership">
-      START A PARTNERSHIP <span aria-hidden="true">→</span>
+    <a class="nav-cta" href="#contact" title="Request an apparel manufacturing quote">
+      REQUEST A QUOTE <span aria-hidden="true">→</span>
     </a>
 
     <!-- Mobile Menu Toggle Button -->
@@ -226,11 +276,11 @@
       <a href="#capabilities">CAPABILITIES</a>
       <a href="#process">PROCESS</a>
       <a href="#focus">FOCUS</a>
-      <a href="#contact">CONTACT</a>
       <a href="measurements.html">MEASUREMENTS</a>
+      <a href="#contact">CONTACT</a>
     </nav>
     <div class="mobile-nav-footer">
-      <a class="button button-light" href="#contact">START A PARTNERSHIP <span aria-hidden="true">→</span></a>
+      <a class="button button-light" href="#contact">REQUEST A QUOTE <span aria-hidden="true">→</span></a>
       <a class="talk" href="mailto:rootsbusinessconnect@gmail.com">rootsbusinessconnect@gmail.com</a>
     </div>
   </div>
@@ -279,8 +329,8 @@
             turning creative concepts into market-ready products.</p>
           <div class="h-ctas">
             <a class="h-cta-primary" href="#contact" id="hero-cta-primary"
-              title="Contact ROOTS for clothing manufacturing">
-              START A PARTNERSHIP
+              title="Request an apparel manufacturing quote from ROOTS">
+              REQUEST A QUOTE
               <span class="h-arrow" aria-hidden="true">→</span>
             </a>
             <a class="h-cta-secondary" href="#about" id="hero-cta-secondary"
@@ -329,7 +379,7 @@
     <!-- Story Section -->
     <section class="story section-ivory" aria-labelledby="story-heading">
       <div class="story-image image-garment" role="img"
-        aria-label="Tailoring and apparel craftsmanship at ROOTS factory"></div>
+        aria-label="A machinist at an industrial sewing machine on a garment production floor"></div>
       <div class="story-copy">
         <p class="eyebrow">BUILT ON EXPERIENCE</p>
         <h2 id="story-heading">DRIVEN BY <br><em>PRECISION.</em></h2>
@@ -349,36 +399,56 @@
       <div class="section-kicker light">02 / OUR PROCESS</div>
       <div class="process-head">
         <h2 id="process-heading">FROM IDEA <br><em>TO REALITY.</em></h2>
-        <p>One considered process. Six precise stages. A finished garment, made with intent.</p>
+        <p>One considered process. Nine precise stages. A finished garment, made with intent.</p>
       </div>
 
-      <figure class="process-visual" id="process-panel" role="tabpanel" aria-labelledby="tab-01">
-        <img src="https://images.unsplash.com/photo-1721664195489-7448042bf305?auto=format&fit=crop&w=1600&q=85"
-            srcset="https://images.unsplash.com/photo-1721664195489-7448042bf305?auto=format&fit=crop&q=85&w=600 600w, https://images.unsplash.com/photo-1721664195489-7448042bf305?auto=format&fit=crop&q=85&w=900 900w, https://images.unsplash.com/photo-1721664195489-7448042bf305?auto=format&fit=crop&q=85&w=1200 1200w, https://images.unsplash.com/photo-1721664195489-7448042bf305?auto=format&fit=crop&q=85&w=1600 1600w, https://images.unsplash.com/photo-1721664195489-7448042bf305?auto=format&fit=crop&q=85&w=2200 2200w"
-            sizes="(max-width: 800px) 88vw, 84vw"
-          alt="A hand tracing a paper garment pattern beside scissors" loading="lazy">
+      <!-- tabindex="0" because the panel holds no focusable control of its own.
+           Without it, tabbing off the selected stage button skipped the stage
+           copy entirely and landed in the next section. -->
+      <figure class="process-visual" id="process-panel" role="tabpanel" aria-labelledby="tab-01" tabindex="0">
+        <div class="process-img-wrap">
+          <img class="process-img is-active" src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1600&q=85"
+              srcset="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=85&w=600 600w, https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=85&w=900 900w, https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=85&w=1200 1200w, https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=85&w=1600 1600w, https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=85&w=2200 2200w"
+              sizes="(max-width: 800px) 88vw, 84vw"
+              width="1600" height="900"
+            alt="Customer garment specification and order details being reviewed" loading="lazy" decoding="async">
+          <img class="process-img is-incoming" aria-hidden="true" alt="" loading="lazy" decoding="async">
+        </div>
         <figcaption class="process-caption">
-          <span aria-hidden="true">01</span>
-          <div>
-            <h3>DESIGN</h3>
-            <p>Transforming creative concepts into production-ready apparel with technical precision.</p>
+          <span aria-hidden="true" class="process-stage-num">01</span>
+          <div class="process-caption-body">
+            <h3 class="process-title">CONFIRM THE ORDER</h3>
+            <p class="process-desc">Customer order received and confirmed with all details.</p>
           </div>
         </figcaption>
       </figure>
 
       <div class="timeline" role="tablist" aria-label="Manufacturing process stages">
+        <div class="timeline-slider-track" aria-hidden="true">
+          <div class="timeline-slider-bar"></div>
+        </div>
         <button role="tab" id="tab-01" aria-selected="true" aria-controls="process-panel"
-          class="active"><span>01</span>DESIGN</button>
+          class="active"><span>01</span>CONFIRM THE ORDER</button>
         <button role="tab" id="tab-02" aria-selected="false"
-          aria-controls="process-panel"><span>02</span>SOURCING</button>
+          aria-controls="process-panel"><span>02</span>PRODUCTION PLANNING</button>
         <button role="tab" id="tab-03" aria-selected="false"
-          aria-controls="process-panel"><span>03</span>DEVELOPMENT</button>
+          aria-controls="process-panel"><span>03</span>RAW MATERIALS SOURCING</button>
         <button role="tab" id="tab-04" aria-selected="false"
-          aria-controls="process-panel"><span>04</span>MANUFACTURING</button>
+          aria-controls="process-panel"><span>04</span>DESIGNING</button>
         <button role="tab" id="tab-05" aria-selected="false"
-          aria-controls="process-panel"><span>05</span>QUALITY</button>
+          aria-controls="process-panel"><span>05</span>SAMPLING</button>
         <button role="tab" id="tab-06" aria-selected="false"
-          aria-controls="process-panel"><span>06</span>DELIVERY</button>
+          aria-controls="process-panel"><span>06</span>BULK PRODUCTION</button>
+        <button role="tab" id="tab-07" aria-selected="false"
+          aria-controls="process-panel"><span>07</span>WASHING</button>
+        <button role="tab" id="tab-08" aria-selected="false"
+          aria-controls="process-panel"><span>08</span>FINISHING</button>
+        <button role="tab" id="tab-09" aria-selected="false"
+          aria-controls="process-panel"><span>09</span>DELIVERY</button>
+      </div>
+
+      <div class="process-footer" aria-hidden="true">
+        <span class="process-tagline">FROM FABRIC TO FASHION</span>
       </div>
     </section>
 
@@ -387,80 +457,104 @@
       <div class="section-kicker light">03 / WHAT WE DO</div>
       <div class="capabilities-head">
         <h2 id="capabilities-heading">CAPABILITY <br><em>WITHOUT COMPROMISE.</em></h2>
-        <a class="button button-outline" href="#contact" title="Start a manufacturing partnership">START A PARTNERSHIP
+        <a class="button button-outline" href="#contact" title="Request an apparel manufacturing quote">REQUEST A QUOTE
           <span aria-hidden="true">→</span></a>
       </div>
 
       <div class="capability-list" role="list">
         <div class="capability-item" role="listitem">
-          <button class="capability-trigger" id="cap-btn-01" aria-expanded="false" aria-controls="cap-panel-01">
-            <span class="cap-num">01</span>
-            <h3>DESIGN & TECHNICAL CAD</h3>
-            <span class="row-arrow" aria-hidden="true">↓</span>
-          </button>
-          <div class="capability-panel" id="cap-panel-01" role="region" aria-labelledby="cap-btn-01" hidden>
-            <p>Translating designer sketches and concepts into production-ready digital tech-packs, precise grade rules,
-              and optimized marker nestings for material efficiency.</p>
+          <h3 class="cap-heading">
+            <button class="capability-trigger" id="cap-btn-01" aria-expanded="false" aria-controls="cap-panel-01">
+              <span class="cap-num">01</span>
+              <span class="cap-title">DESIGN & TECHNICAL CAD</span>
+              <span class="row-arrow" aria-hidden="true">↓</span>
+            </button>
+          </h3>
+          <div class="capability-panel" id="cap-panel-01" role="region" aria-labelledby="cap-btn-01">
+            <div class="capability-panel-inner">
+              <p>Translating designer sketches and concepts into production-ready digital tech-packs, precise grade rules,
+                and optimized marker nestings for material efficiency.</p>
+            </div>
           </div>
         </div>
 
         <div class="capability-item" role="listitem">
-          <button class="capability-trigger" id="cap-btn-02" aria-expanded="false" aria-controls="cap-panel-02">
-            <span class="cap-num">02</span>
-            <h3>MATERIAL & FABRIC SOURCING</h3>
-            <span class="row-arrow" aria-hidden="true">↓</span>
-          </button>
-          <div class="capability-panel" id="cap-panel-02" role="region" aria-labelledby="cap-btn-02" hidden>
-            <p>Direct mill relationships for premium denim twills, pure linen weaves, sustainable blends, and bespoke
-              hardware trims tailored to client specifications.</p>
+          <h3 class="cap-heading">
+            <button class="capability-trigger" id="cap-btn-02" aria-expanded="false" aria-controls="cap-panel-02">
+              <span class="cap-num">02</span>
+              <span class="cap-title">MATERIAL & FABRIC SOURCING</span>
+              <span class="row-arrow" aria-hidden="true">↓</span>
+            </button>
+          </h3>
+          <div class="capability-panel" id="cap-panel-02" role="region" aria-labelledby="cap-btn-02">
+            <div class="capability-panel-inner">
+              <p>Direct mill relationships for premium denim twills, pure linen weaves, sustainable blends, and bespoke
+                hardware trims tailored to client specifications.</p>
+            </div>
           </div>
         </div>
 
         <div class="capability-item" role="listitem">
-          <button class="capability-trigger" id="cap-btn-03" aria-expanded="false" aria-controls="cap-panel-03">
-            <span class="cap-num">03</span>
-            <h3>PRODUCT DEVELOPMENT & SAMPLING</h3>
-            <span class="row-arrow" aria-hidden="true">↓</span>
-          </button>
-          <div class="capability-panel" id="cap-panel-03" role="region" aria-labelledby="cap-btn-03" hidden>
-            <p>Rapid physical prototyping, fit block validation, specialized wash tests, and pre-production approval
-              samples ensuring structural integrity.</p>
+          <h3 class="cap-heading">
+            <button class="capability-trigger" id="cap-btn-03" aria-expanded="false" aria-controls="cap-panel-03">
+              <span class="cap-num">03</span>
+              <span class="cap-title">PRODUCT DEVELOPMENT & SAMPLING</span>
+              <span class="row-arrow" aria-hidden="true">↓</span>
+            </button>
+          </h3>
+          <div class="capability-panel" id="cap-panel-03" role="region" aria-labelledby="cap-btn-03">
+            <div class="capability-panel-inner">
+              <p>Rapid physical prototyping, fit block validation, specialized wash tests, and pre-production approval
+                samples ensuring structural integrity.</p>
+            </div>
           </div>
         </div>
 
         <div class="capability-item" role="listitem">
-          <button class="capability-trigger" id="cap-btn-04" aria-expanded="false" aria-controls="cap-panel-04">
-            <span class="cap-num">04</span>
-            <h3>PRECISION BULK MANUFACTURING</h3>
-            <span class="row-arrow" aria-hidden="true">↓</span>
-          </button>
-          <div class="capability-panel" id="cap-panel-04" role="region" aria-labelledby="cap-btn-04" hidden>
-            <p>Industrial garment production with automated cutting precision, reinforced stitching lines, and
-              specialized processing tailored for denim, linen, and woven wear.</p>
+          <h3 class="cap-heading">
+            <button class="capability-trigger" id="cap-btn-04" aria-expanded="false" aria-controls="cap-panel-04">
+              <span class="cap-num">04</span>
+              <span class="cap-title">PRECISION BULK MANUFACTURING</span>
+              <span class="row-arrow" aria-hidden="true">↓</span>
+            </button>
+          </h3>
+          <div class="capability-panel" id="cap-panel-04" role="region" aria-labelledby="cap-btn-04">
+            <div class="capability-panel-inner">
+              <p>Industrial garment production with automated cutting precision, reinforced stitching lines, and
+                specialized processing tailored for denim, linen, and woven wear.</p>
+            </div>
           </div>
         </div>
 
         <div class="capability-item" role="listitem">
-          <button class="capability-trigger" id="cap-btn-05" aria-expanded="false" aria-controls="cap-panel-05">
-            <span class="cap-num">05</span>
-            <h3>STRICT QUALITY CONTROL</h3>
-            <span class="row-arrow" aria-hidden="true">↓</span>
-          </button>
-          <div class="capability-panel" id="cap-panel-05" role="region" aria-labelledby="cap-btn-05" hidden>
-            <p>Multi-checkpoint inspection covering fabric defects, seam tensile strength, color fastness, dimensional
-              tolerances, and final aesthetic review.</p>
+          <h3 class="cap-heading">
+            <button class="capability-trigger" id="cap-btn-05" aria-expanded="false" aria-controls="cap-panel-05">
+              <span class="cap-num">05</span>
+              <span class="cap-title">STRICT QUALITY CONTROL</span>
+              <span class="row-arrow" aria-hidden="true">↓</span>
+            </button>
+          </h3>
+          <div class="capability-panel" id="cap-panel-05" role="region" aria-labelledby="cap-btn-05">
+            <div class="capability-panel-inner">
+              <p>Multi-checkpoint inspection covering fabric defects, seam tensile strength, color fastness, dimensional
+                tolerances, and final aesthetic review.</p>
+            </div>
           </div>
         </div>
 
         <div class="capability-item" role="listitem">
-          <button class="capability-trigger" id="cap-btn-06" aria-expanded="false" aria-controls="cap-panel-06">
-            <span class="cap-num">06</span>
-            <h3>FINAL PACKAGING & GLOBAL LOGISTICS</h3>
-            <span class="row-arrow" aria-hidden="true">↓</span>
-          </button>
-          <div class="capability-panel" id="cap-panel-06" role="region" aria-labelledby="cap-btn-06" hidden>
-            <p>Custom brand hangtags, barcode application, protective polybagging, carton standardization, and
-              export-ready logistics coordination.</p>
+          <h3 class="cap-heading">
+            <button class="capability-trigger" id="cap-btn-06" aria-expanded="false" aria-controls="cap-panel-06">
+              <span class="cap-num">06</span>
+              <span class="cap-title">FINAL PACKAGING & GLOBAL LOGISTICS</span>
+              <span class="row-arrow" aria-hidden="true">↓</span>
+            </button>
+          </h3>
+          <div class="capability-panel" id="cap-panel-06" role="region" aria-labelledby="cap-btn-06">
+            <div class="capability-panel-inner">
+              <p>Custom brand hangtags, barcode application, protective polybagging, carton standardization, and
+                export-ready logistics coordination.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -479,12 +573,13 @@
           <img src="https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=1200&q=85"
             srcset="https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=85&w=400 400w, https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=85&w=600 600w, https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=85&w=900 900w, https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=85&w=1200 1200w"
             sizes="(max-width: 639px) 88vw, (max-width: 1080px) 44vw, 42vw"
-            alt="Folded denim jeans" loading="lazy">
+            width="600" height="500"
+            alt="Folded denim jeans" loading="lazy" decoding="async">
           <div class="tile-overlay" aria-hidden="true"></div>
           <div class="tile-label">
             <span>01</span>
             <strong>MEN'S DENIM</strong>
-            <span>VIEW DETAILS <span aria-hidden="true">→</span></span>
+            <span>ENQUIRE NOW <span aria-hidden="true">→</span></span>
           </div>
         </a>
 
@@ -492,12 +587,14 @@
           <img src="assets/images/roots-focus-linen.webp"
             srcset="assets/images/roots-focus-linen-400.webp 400w, assets/images/roots-focus-linen-800.webp 800w, assets/images/roots-focus-linen.webp 1200w"
             sizes="(max-width: 639px) 88vw, (max-width: 1080px) 44vw, 42vw"
-            alt="Men's premium linen shirts folded on tailored surface" loading="lazy">
+            width="600" height="500"
+            alt="Detail of tailored linen trousers, waistband and welt pocket" loading="lazy"
+            decoding="async">
           <div class="tile-overlay" aria-hidden="true"></div>
           <div class="tile-label">
             <span>02</span>
             <strong>MEN'S LINEN</strong>
-            <span>VIEW DETAILS <span aria-hidden="true">→</span></span>
+            <span>ENQUIRE NOW <span aria-hidden="true">→</span></span>
           </div>
         </a>
 
@@ -505,12 +602,13 @@
           <img src="assets/images/roots-focus-cargos.webp"
             srcset="assets/images/roots-focus-cargos-400.webp 400w, assets/images/roots-focus-cargos-800.webp 800w, assets/images/roots-focus-cargos.webp 1200w"
             sizes="(max-width: 639px) 88vw, (max-width: 1080px) 44vw, 42vw"
-            alt="Cargo pants tailoring and manufacturing details" loading="lazy">
+            width="600" height="500"
+            alt="Cargo pants tailoring and manufacturing details" loading="lazy" decoding="async">
           <div class="tile-overlay" aria-hidden="true"></div>
           <div class="tile-label">
             <span>03</span>
             <strong>CARGOS</strong>
-            <span>VIEW DETAILS <span aria-hidden="true">→</span></span>
+            <span>ENQUIRE NOW <span aria-hidden="true">→</span></span>
           </div>
         </a>
 
@@ -518,12 +616,13 @@
           <img src="assets/images/roots-focus-kids.webp"
             srcset="assets/images/roots-focus-kids-400.webp 400w, assets/images/roots-focus-kids-800.webp 800w, assets/images/roots-focus-kids.webp 1200w"
             sizes="(max-width: 639px) 88vw, (max-width: 1080px) 44vw, 42vw"
-            alt="Children apparel craftsmanship and knitwear styling" loading="lazy">
+            width="600" height="500"
+            alt="Children apparel craftsmanship and knitwear styling" loading="lazy" decoding="async">
           <div class="tile-overlay" aria-hidden="true"></div>
           <div class="tile-label">
             <span>04</span>
             <strong>KIDS</strong>
-            <span>VIEW DETAILS <span aria-hidden="true">→</span></span>
+            <span>ENQUIRE NOW <span aria-hidden="true">→</span></span>
           </div>
         </a>
       </div>
@@ -545,7 +644,8 @@
           <img src="https://images.unsplash.com/photo-1616411598297-e0053c6ee59d?auto=format&fit=crop&w=800&q=85"
             srcset="https://images.unsplash.com/photo-1616411598297-e0053c6ee59d?auto=format&fit=crop&q=85&w=300 300w, https://images.unsplash.com/photo-1616411598297-e0053c6ee59d?auto=format&fit=crop&q=85&w=450 450w, https://images.unsplash.com/photo-1616411598297-e0053c6ee59d?auto=format&fit=crop&q=85&w=600 600w, https://images.unsplash.com/photo-1616411598297-e0053c6ee59d?auto=format&fit=crop&q=85&w=800 800w"
             sizes="(max-width: 800px) min(70vw, 300px), 23vw"
-            alt="Denim twill with a folded seam edge" loading="lazy">
+            width="400" height="520"
+            alt="Denim twill with a folded seam edge" loading="lazy" decoding="async">
           <figcaption>01 / DENIM</figcaption>
         </figure>
 
@@ -553,7 +653,8 @@
           <img src="https://images.unsplash.com/photo-1608424371207-ab70d9d68e80?auto=format&fit=crop&w=800&q=85"
             srcset="https://images.unsplash.com/photo-1608424371207-ab70d9d68e80?auto=format&fit=crop&q=85&w=300 300w, https://images.unsplash.com/photo-1608424371207-ab70d9d68e80?auto=format&fit=crop&q=85&w=450 450w, https://images.unsplash.com/photo-1608424371207-ab70d9d68e80?auto=format&fit=crop&q=85&w=600 600w, https://images.unsplash.com/photo-1608424371207-ab70d9d68e80?auto=format&fit=crop&q=85&w=800 800w"
             sizes="(max-width: 800px) min(70vw, 300px), 23vw"
-            alt="Natural linen fabric showing its weave" loading="lazy">
+            width="400" height="520"
+            alt="Natural linen fabric showing its weave" loading="lazy" decoding="async">
           <figcaption>02 / LINEN</figcaption>
         </figure>
 
@@ -561,7 +662,8 @@
           <img src="https://images.unsplash.com/photo-1497997092403-f091fcf5b6c4?auto=format&fit=crop&w=800&q=85"
             srcset="https://images.unsplash.com/photo-1497997092403-f091fcf5b6c4?auto=format&fit=crop&q=85&w=300 300w, https://images.unsplash.com/photo-1497997092403-f091fcf5b6c4?auto=format&fit=crop&q=85&w=450 450w, https://images.unsplash.com/photo-1497997092403-f091fcf5b6c4?auto=format&fit=crop&q=85&w=600 600w, https://images.unsplash.com/photo-1497997092403-f091fcf5b6c4?auto=format&fit=crop&q=85&w=800 800w"
             sizes="(max-width: 800px) min(70vw, 300px), 23vw"
-            alt="A sewing machine needle and presser foot stitching dark fabric" loading="lazy">
+            width="400" height="520"
+            alt="A sewing machine needle and presser foot stitching dark fabric" loading="lazy" decoding="async">
           <figcaption>03 / STITCH</figcaption>
         </figure>
 
@@ -569,15 +671,27 @@
           <img src="https://images.unsplash.com/photo-1696546760882-1d34a7af6800?auto=format&fit=crop&w=800&q=85"
             srcset="https://images.unsplash.com/photo-1696546760882-1d34a7af6800?auto=format&fit=crop&q=85&w=300 300w, https://images.unsplash.com/photo-1696546760882-1d34a7af6800?auto=format&fit=crop&q=85&w=450 450w, https://images.unsplash.com/photo-1696546760882-1d34a7af6800?auto=format&fit=crop&q=85&w=600 600w, https://images.unsplash.com/photo-1696546760882-1d34a7af6800?auto=format&fit=crop&q=85&w=800 800w"
             sizes="(max-width: 800px) min(70vw, 300px), 23vw"
-            alt="A garment being pressed on an industrial press" loading="lazy">
+            width="400" height="520"
+            alt="A garment being pressed on an industrial press" loading="lazy" decoding="async">
           <figcaption>04 / FINISH</figcaption>
         </figure>
       </div>
     </section>
 
-    <!-- 06: Quality Standard -->
+    <!-- 06: Quality Standard
+
+         IMAGE REPLACEMENT REQUIRED — PRODUCTION RISK, see assets/README.md.
+         This background is hotlinked stock (css/style.css --img-quality) and it
+         carries another company's branding: both shirts wear a legible "THE TIE
+         BAR / TRIM FIT" neck label, reproduced at roughly a third of the frame
+         on desktop. A contract manufacturer's own quality statement should not
+         be illustrated with a competitor's retail product. It also does not
+         depict stitching or inspection, so the label below has been corrected
+         to describe what is actually shown until ROOTS photography replaces it.
+         -->
     <section class="quality" aria-labelledby="quality-heading">
-      <div class="quality-image" role="img" aria-label="Garment stitching and quality assurance"></div>
+      <div class="quality-image" role="img"
+        aria-label="Two pressed shirts with neckties, hung side by side"></div>
       <div class="quality-overlay" aria-hidden="true"></div>
       <div class="quality-content">
         <p class="eyebrow light">06 / THE STANDARD</p>
@@ -648,15 +762,22 @@
       </article>
     </section>
 
-    <!-- Closing Call to Action -->
+    <!-- Closing Call to Action
+
+         IMAGE REPLACEMENT REQUIRED — see assets/README.md. Hotlinked stock
+         (css/style.css --img-closing). It is a styled flat-lay of folded
+         knitwear, jeans, a wristwatch and cut tulips — a lifestyle still life,
+         not a manufacturing floor, which is what the label used to claim.
+         -->
     <section class="closing" aria-labelledby="closing-heading">
-      <div class="closing-image" role="img" aria-label="Textile manufacturing floor ready for production"></div>
+      <div class="closing-image" role="img"
+        aria-label="Folded knitwear and denim arranged with a watch and tulips"></div>
       <div class="closing-overlay" aria-hidden="true"></div>
       <div class="closing-content">
         <p class="eyebrow light">THE NEXT CHAPTER</p>
         <h2 id="closing-heading">HAVE A BRAND <br><em>TO BUILD?</em></h2>
         <p>Let's turn your creative vision into market-ready apparel.</p>
-        <a class="button button-light" href="#contact" title="Get in touch to start a partnership">START A PARTNERSHIP
+        <a class="button button-light" href="#contact" title="Request an apparel manufacturing quote">REQUEST A QUOTE
           <span aria-hidden="true">→</span></a>
         <a class="talk" href="mailto:rootsbusinessconnect@gmail.com" title="Email ROOTS Business team">TALK TO ROOTS
           <span aria-hidden="true">✉</span></a>
@@ -672,8 +793,14 @@
 
           <address class="contact-details">
             <p>
-              <span>PHONE / WHATSAPP</span>
-              <a href="tel:+9118296376673" title="Call ROOTS office">+91 18296 376 673</a>
+              <span>PHONE ENQUIRIES</span>
+              <a href="tel:+918296376673" title="Call ROOTS office">+91 82963 76673</a>
+            </p>
+            <p>
+              <span>WHATSAPP CHAT</span>
+              <a href="https://wa.me/918296376673?text=Hello%20ROOTS%2C%20I%20would%20like%20to%20discuss%20an%20apparel%20manufacturing%20requirement.%20https%3A%2F%2Fwww.rootsbusiness.in%2F%23contact"
+                target="_blank" rel="noopener noreferrer"
+                title="Chat with ROOTS on WhatsApp">+91 82963 76673</a>
             </p>
             <p>
               <span>EMAIL ENQUIRIES</span>
@@ -694,7 +821,7 @@
           </address>
         </div>
 
-        <form aria-label="Manufacturing Inquiry Form" novalidate>
+        <form aria-label="Manufacturing Inquiry Form" method="post" novalidate>
           <!-- Anti-spam Honeypot Field -->
           <div class="hp-field" aria-hidden="true">
             <label for="contact-hp">Leave this field blank</label>
@@ -725,6 +852,20 @@
             </label>
           </div>
 
+          <div class="form-row">
+            <label for="contact-location">
+              LOCATION / CITY
+              <input id="contact-location" name="location" type="text" autocomplete="address-level2"
+                placeholder="e.g. Bangalore, Mumbai, London, Dubai">
+            </label>
+
+            <label for="contact-gst">
+              GST NUMBER
+              <input id="contact-gst" name="gst" type="text"
+                placeholder="e.g. 29AAAAA0000A1Z5 (Optional)">
+            </label>
+          </div>
+
           <label for="contact-manufacture">
             WHAT ARE YOU LOOKING TO MANUFACTURE?
             <input id="contact-manufacture" name="manufacture" type="text"
@@ -747,7 +888,7 @@
   <footer class="footer" role="contentinfo">
     <div class="footer-top">
       <div class="footer-brand">
-        <img src="assets/images/roots-logo.png" alt="ROOTS Apparel Logo" width="165" height="60">
+        <img src="assets/images/roots-logo.png" alt="ROOTS Apparel Logo" width="480" height="320">
         <p>THE ENGINE BEHIND THE BRANDS</p>
       </div>
 
@@ -756,13 +897,13 @@
         <a href="#capabilities">CAPABILITIES</a>
         <a href="#process">PROCESS</a>
         <a href="#focus">FOCUS</a>
-        <a href="#contact">CONTACT</a>
         <a href="measurements.html">CUSTOM MEASUREMENTS</a>
+        <a href="#contact">CONTACT</a>
       </nav>
 
       <address class="footer-contact">
         <a href="mailto:rootsbusinessconnect@gmail.com">rootsbusinessconnect@gmail.com</a>
-        <a href="tel:+9118296376673">+91 18296 376 673</a>
+        <a href="tel:+918296376673">+91 82963 76673</a>
         <span>Bangalore, Karnataka, India</span>
       </address>
     </div>
@@ -777,7 +918,7 @@
   <!-- Floating WhatsApp contact. A plain anchor: no widget script, no JS to
        open it, and deliberately quieter than the START A PARTNERSHIP CTA. -->
   <a class="wa-float"
-    href="https://wa.me/919645858874?text=Hello%20ROOTS%2C%20I%20would%20like%20to%20discuss%20an%20apparel%20manufacturing%20requirement."
+    href="https://wa.me/918296376673?text=Hello%20ROOTS%2C%20I%20would%20like%20to%20discuss%20an%20apparel%20manufacturing%20requirement.%20https%3A%2F%2Fwww.rootsbusiness.in%2F%23contact"
     target="_blank" rel="noopener noreferrer"
     aria-label="Chat with ROOTS on WhatsApp">
     <svg class="wa-float-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">

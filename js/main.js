@@ -10,6 +10,10 @@
   // out of sync with the address shown in the contact section and footer.
   const CONTACT_EMAIL = 'rootsbusinessconnect@gmail.com';
 
+  // Google Sheets Webhook URL: Replace with your deployed Google Apps Script Web App URL.
+  // Instructions are in google-apps-script.js
+  const GOOGLE_SHEET_URL = '';
+
   // ------------------------------------------------------------------------
   // 0. Homepage entry state — a refresh starts at the hero
   //
@@ -169,86 +173,235 @@
 
   const processStages = [
     {
-      name: 'DESIGN',
-      copy: 'Transforming creative concepts into production-ready apparel with technical precision.',
-      image: 'https://images.unsplash.com/photo-1721664195489-7448042bf305?auto=format&fit=crop&q=85',
-      alt: 'A hand tracing a paper garment pattern beside scissors'
+      name: 'CONFIRM THE ORDER',
+      copy: 'Customer order received and confirmed with all details.',
+      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=85',
+      alt: 'Customer garment specification and order details being reviewed'
     },
     {
-      name: 'SOURCING',
-      copy: 'Expert material and fabric sourcing for every brief, from premium denim to sustainable linen.',
+      name: 'PRODUCTION PLANNING',
+      copy: 'Plan production schedule, allocate resources, and set timelines.',
+      image: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&q=85',
+      alt: 'Production schedule planning, resource allocation and project timelines'
+    },
+    {
+      name: 'RAW MATERIALS SOURCING',
+      copy: 'Source high-quality denim fabric, trims, buttons, labels and other materials.',
       image: 'https://images.unsplash.com/photo-1621882844178-fa8129633ce4?auto=format&fit=crop&q=85',
-      alt: 'Rolls of fabric stacked together'
+      alt: 'Rolls of high-quality denim fabric and raw apparel materials'
     },
     {
-      name: 'DEVELOPMENT',
-      copy: 'Sampling, fitting, and technical refinement with meticulous attention to detail.',
+      name: 'DESIGNING',
+      copy: 'Create garment designs, patterns and tech packs.',
+      image: 'https://images.unsplash.com/photo-1721664195489-7448042bf305?auto=format&fit=crop&q=85',
+      alt: 'A hand tracing a garment design pattern and technical drawing'
+    },
+    {
+      name: 'SAMPLING',
+      copy: 'Develop samples, get approvals and make necessary changes.',
       image: 'https://images.unsplash.com/photo-1578353022142-09264fd64295?auto=format&fit=crop&q=85',
-      alt: 'Thread spools, scissors, a measuring tape and a pattern on a work surface'
+      alt: 'Sample garment development with thread, pattern cuts and measuring tape'
     },
     {
-      name: 'MANUFACTURING',
-      copy: 'Precision apparel production scaled for your brand with state-of-the-art machinery.',
+      name: 'BULK PRODUCTION',
+      copy: 'Cutting, stitching and assembling in bulk as per approved sample.',
       image: 'https://images.unsplash.com/photo-1589793463357-5fb813435467?auto=format&fit=crop&q=85',
-      alt: 'Rows of operators at sewing machines in a garment factory'
+      alt: 'Rows of operators cutting and stitching apparel in bulk on factory floor'
     },
     {
-      name: 'QUALITY',
-      copy: 'Comprehensive multi-point inspection and artisan finishing at every single stage.',
+      name: 'WASHING',
+      copy: 'Apply washing, bleaching and special effects for desired look and feel.',
+      image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?auto=format&fit=crop&q=85',
+      alt: 'Industrial garment washing and special wash effects processing'
+    },
+    {
+      name: 'FINISHING',
+      copy: 'Ironing, quality check, tagging, folding and final inspection.',
       image: 'https://images.unsplash.com/photo-1772291320136-7bfb40006088?auto=format&fit=crop&q=85',
-      alt: 'Hands inspecting the seam of a pale garment'
+      alt: 'Garment ironing, quality check inspection, tagging and folding'
     },
     {
       name: 'DELIVERY',
-      copy: 'Market-ready, securely packed final production delivered reliably across global destinations.',
+      copy: 'Pack, label and ship to customers on time.',
       image: 'https://images.unsplash.com/photo-1549040634-41fbcd2eb623?auto=format&fit=crop&q=85',
-      alt: 'Finished pressed shirts hanging on a rail'
+      alt: 'Finished, pressed, labeled and packed garments ready for timely delivery'
     }
   ];
 
+  // ------------------------------------------------------------------------
+  // 1. Process Stages Interactive Switcher with Physics-Based Sliding & Touch
+  // ------------------------------------------------------------------------
   function initProcessSwitcher() {
     const visualContainer = document.querySelector('.process-visual');
     if (!visualContainer) return;
 
-    const img = visualContainer.querySelector('img');
-    const num = visualContainer.querySelector('.process-caption > span');
-    const title = visualContainer.querySelector('.process-caption h3');
-    const copy = visualContainer.querySelector('.process-caption p');
+    let imgActive = visualContainer.querySelector('.process-img.is-active');
+    let imgIncoming = visualContainer.querySelector('.process-img.is-incoming');
+    if (!imgActive) imgActive = visualContainer.querySelector('img');
+
+    const caption = visualContainer.querySelector('.process-caption');
+    const num = visualContainer.querySelector('.process-stage-num');
+    const title = visualContainer.querySelector('.process-title') || visualContainer.querySelector('.process-caption h3');
+    const copy = visualContainer.querySelector('.process-desc') || visualContainer.querySelector('.process-caption p');
+    const timeline = document.querySelector('.timeline');
     const buttons = Array.from(document.querySelectorAll('.timeline button'));
 
-    if (!img || !buttons.length) return;
+    if (!imgActive || !buttons.length) return;
 
-    const activateStage = (index) => {
+    let currentIndex = buttons.findIndex((b) => b.getAttribute('aria-selected') === 'true');
+    if (currentIndex < 0) currentIndex = 0;
+
+    const prefersReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Sliding indicator rail synchronization
+    const updateSlider = (btn) => {
+      if (!timeline || !btn) return;
+      const x = btn.offsetLeft;
+      const w = btn.offsetWidth;
+      timeline.style.setProperty('--slider-x', `${x}px`);
+      timeline.style.setProperty('--slider-w', `${w}px`);
+      timeline.classList.add('has-slider');
+    };
+
+    // Centre the active stage in the timeline's own horizontal rail.
+    //
+    // This used to call activeBtn.scrollIntoView({ block: 'nearest', inline:
+    // 'center' }). scrollIntoView walks EVERY scrollable ancestor, the document
+    // included, so on desktop — where .timeline is a plain grid with no
+    // overflow — it scrolled the whole page down to the process section.
+    // `behavior: 'auto'` does not opt out either: it resolves to the computed
+    // `scroll-behavior`, which is `smooth` on html, so the page glided away
+    // from wherever the reader was.
+    //
+    // Resize fires continuously while a desktop window is dragged and every
+    // time a mobile address bar shows or hides, so that was a page jump the
+    // reader never asked for. Setting scrollLeft on the rail itself cannot
+    // move the document.
+    const centreInRail = (btn, smooth) => {
+      if (!timeline || !btn) return;
+      if (timeline.scrollWidth <= timeline.clientWidth) return;  // not a rail at this width
+      const target = btn.offsetLeft - (timeline.clientWidth - btn.offsetWidth) / 2;
+      const max = timeline.scrollWidth - timeline.clientWidth;
+      const left = Math.max(0, Math.min(target, max));
+      if (smooth && !prefersReduced() && typeof timeline.scrollTo === 'function') {
+        timeline.scrollTo({ left, behavior: 'smooth' });
+      } else {
+        timeline.scrollLeft = left;
+      }
+    };
+
+    // Position slider immediately on current active button
+    updateSlider(buttons[currentIndex]);
+
+    let resizeQueued = false;
+    window.addEventListener('resize', () => {
+      if (resizeQueued) return;
+      resizeQueued = true;
+      window.requestAnimationFrame(() => {
+        resizeQueued = false;
+        const activeBtn = buttons[currentIndex] || buttons[0];
+        updateSlider(activeBtn);
+        centreInRail(activeBtn, false);
+      });
+    }, { passive: true });
+
+    // The roving tabindex the tablist pattern requires. It was previously only
+    // established inside activateStage, i.e. after the first interaction, so on
+    // page load all nine tabs sat in the tab order — a keyboard visitor had to
+    // press Tab nine times to get past the process section instead of once.
+    buttons.forEach((b, i) => { b.tabIndex = i === currentIndex ? 0 : -1; });
+
+    let captionTimer = 0;
+
+    const activateStage = (index, userInitiated) => {
+      if (index === currentIndex && !userInitiated) return;
       const stage = processStages[index];
       if (!stage) return;
+
+      currentIndex = index;
 
       buttons.forEach((b, i) => {
         const isSelected = i === index;
         b.classList.toggle('active', isSelected);
         b.setAttribute('aria-selected', String(isSelected));
         b.tabIndex = isSelected ? 0 : -1;
+        if (isSelected) {
+          updateSlider(b);
+          if (userInitiated) {
+            // Same reason as centreInRail's comment: scrollIntoView would be
+            // free to move the document as well as the rail. A keyboard user
+            // arrowing along the tablist should never lose their scroll
+            // position to a control that is already on screen.
+            centreInRail(b, true);
+          }
+        }
       });
 
-      // Serve a width that suits the viewport rather than a fixed 1600px file.
-      // The frame is ~343px wide on a phone and ~2150px on a 2560px display, so
-      // one size meant phones downloaded roughly five times the pixels they use.
-      // Unsplash returns any width from the same photo id, so this is bytes
-      // only — the crop and the picture are unchanged.
-      img.srcset = PROCESS_WIDTHS.map((w) => `${stage.image}&w=${w} ${w}w`).join(', ');
-      img.sizes = '(max-width: 800px) 88vw, 84vw';
-      img.src = `${stage.image}&w=1200`;
-      img.alt = stage.alt;
-      if (num) num.textContent = String(index + 1).padStart(2, '0');
-      if (title) title.textContent = stage.name;
-      if (copy) copy.textContent = stage.copy;
-
       visualContainer.setAttribute('aria-labelledby', buttons[index].id);
+
+      if (prefersReduced()) {
+        imgActive.srcset = PROCESS_WIDTHS.map((w) => `${stage.image}&w=${w} ${w}w`).join(', ');
+        imgActive.sizes = '(max-width: 800px) 88vw, 84vw';
+        imgActive.src = `${stage.image}&w=1200`;
+        imgActive.alt = stage.alt;
+        if (num) num.textContent = String(index + 1).padStart(2, '0');
+        if (title) title.textContent = stage.name;
+        if (copy) copy.textContent = stage.copy;
+        return;
+      }
+
+      // Smooth crossfade & stagger
+      if (caption) caption.classList.add('is-transitioning');
+
+      // Update incoming image layer
+      if (imgIncoming) {
+        imgIncoming.srcset = PROCESS_WIDTHS.map((w) => `${stage.image}&w=${w} ${w}w`).join(', ');
+        imgIncoming.sizes = '(max-width: 800px) 88vw, 84vw';
+        imgIncoming.src = `${stage.image}&w=1200`;
+        imgIncoming.alt = stage.alt;
+        imgIncoming.removeAttribute('aria-hidden');
+
+        // Swap visual layers
+        imgActive.classList.remove('is-active');
+        imgActive.classList.add('is-settling');
+        imgActive.setAttribute('aria-hidden', 'true');
+
+        imgIncoming.classList.remove('is-incoming', 'is-settling');
+        imgIncoming.classList.add('is-active');
+
+        // Swap pointers
+        const temp = imgActive;
+        imgActive = imgIncoming;
+        imgIncoming = temp;
+        imgIncoming.classList.add('is-incoming');
+      } else {
+        imgActive.srcset = PROCESS_WIDTHS.map((w) => `${stage.image}&w=${w} ${w}w`).join(', ');
+        imgActive.src = `${stage.image}&w=1200`;
+        imgActive.alt = stage.alt;
+      }
+
+      // Editorial micro-stagger for caption text.
+      //
+      // Cleared first: each call used to queue its own 140 ms timer with no
+      // handle kept, so swiping or arrowing through stages faster than that
+      // left several in flight at once. They fire in the order they were
+      // queued, not the order the user chose, so the caption could settle on a
+      // stage the visitor had already moved past — and the last one to land
+      // also cleared `is-transitioning`, ending the fade for a stage that was
+      // no longer showing.
+      clearTimeout(captionTimer);
+      captionTimer = setTimeout(() => {
+        if (num) num.textContent = String(index + 1).padStart(2, '0');
+        if (title) title.textContent = stage.name;
+        if (copy) copy.textContent = stage.copy;
+        if (caption) caption.classList.remove('is-transitioning');
+      }, 140);
     };
 
+    // Keyboard arrow navigation
     buttons.forEach((btn, index) => {
-      btn.addEventListener('click', () => activateStage(index));
+      btn.addEventListener('click', () => activateStage(index, true));
 
-      // Keyboard arrow navigation for tabs
       btn.addEventListener('keydown', (e) => {
         let newIndex = index;
         if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
@@ -265,30 +418,110 @@
 
         e.preventDefault();
         buttons[newIndex].focus();
-        activateStage(newIndex);
+        activateStage(newIndex, true);
+      });
+    });
+
+    // Touch gesture swipe on process visual card
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isTrackingTouch = false;
+
+    visualContainer.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      isTrackingTouch = true;
+    }, { passive: true });
+
+    visualContainer.addEventListener('touchend', (e) => {
+      if (!isTrackingTouch || e.changedTouches.length !== 1) return;
+      isTrackingTouch = false;
+
+      const diffX = e.changedTouches[0].clientX - touchStartX;
+      const diffY = e.changedTouches[0].clientY - touchStartY;
+
+      // Check if gesture is a decisive horizontal swipe (> 45px and 1.5x vertical delta)
+      if (Math.abs(diffX) > 45 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+        if (diffX < 0) {
+          // Swipe Left -> Next Stage
+          const nextIndex = (currentIndex + 1) % processStages.length;
+          activateStage(nextIndex, true);
+        } else {
+          // Swipe Right -> Previous Stage
+          const prevIndex = (currentIndex - 1 + processStages.length) % processStages.length;
+          activateStage(prevIndex, true);
+        }
+      }
+    }, { passive: true });
+  }
+
+  // ------------------------------------------------------------------------
+  // 2. Accessible Capability Accordion with Physics-Based Smooth Expansion
+  // ------------------------------------------------------------------------
+  function initCapabilityAccordion() {
+    const items = document.querySelectorAll('.capability-item');
+    if (!items.length) return;
+
+    items.forEach((item) => {
+      const trigger = item.querySelector('.capability-trigger');
+      const panel = item.querySelector('.capability-panel');
+      if (!trigger || !panel) return;
+
+      trigger.addEventListener('click', () => {
+        const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
+        const willExpand = !isExpanded;
+
+        trigger.setAttribute('aria-expanded', String(willExpand));
+        item.classList.toggle('is-open', willExpand);
+        panel.classList.toggle('is-open', willExpand);
       });
     });
   }
 
   // ------------------------------------------------------------------------
-  // 2. Accessible Capability Accordion Switcher
+  // 2a. Section Scroll Reveals (Subtle & Non-Intrusive)
   // ------------------------------------------------------------------------
-  function initCapabilityAccordion() {
-    const triggers = document.querySelectorAll('.capability-trigger');
-    if (!triggers.length) return;
+  function initSectionScrollReveals() {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced || typeof IntersectionObserver !== 'function') return;
 
-    triggers.forEach((trigger) => {
-      trigger.addEventListener('click', () => {
-        const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
-        const panelId = trigger.getAttribute('aria-controls');
-        const panel = document.getElementById(panelId);
+    const standardTargets = document.querySelectorAll(
+      '.intro-grid, .story-copy, .process-head, .capabilities-head, .focus-head'
+    );
+    // `.why-roots-head`, `.mission-content` and `.vision-content` were also
+    // listed here and match no element in index.html — the real markup is
+    // `.why-grid` and `.mission-half`. Three of the eleven selectors therefore
+    // did nothing, and the WHY ROOTS / MISSION / VISION sections have never
+    // revealed on scroll.
+    //
+    // Removed rather than repointed: those three sections currently arrive
+    // still, which gives the long dark middle of the page a rest between the
+    // moving ones. Reinstating them is a design decision, not a bug fix — if
+    // it is wanted, add '.why-grid, .mission-half' to this list.
+    const quietTargets = document.querySelectorAll(
+      '.quality-content, .closing-content, .contact-details'
+    );
 
-        if (!panel) return;
+    if (!standardTargets.length && !quietTargets.length) return;
 
-        // Toggle state
-        trigger.setAttribute('aria-expanded', String(!isExpanded));
-        panel.hidden = isExpanded;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-revealed');
+          observer.unobserve(entry.target);
+        }
       });
+    }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+
+    standardTargets.forEach((target) => {
+      target.classList.add('reveal-on-scroll');
+      observer.observe(target);
+    });
+
+    quietTargets.forEach((target) => {
+      target.classList.add('reveal-on-scroll', 'reveal-quiet');
+      observer.observe(target);
     });
   }
 
@@ -345,6 +578,7 @@
       if (footer) footer.setAttribute('aria-hidden', String(isOpen));
 
       document.body.style.overflow = isOpen ? 'hidden' : '';
+      document.body.classList.toggle('mobile-nav-open', isOpen);
 
       if (isOpen) {
         const focusable = getFocusableElements();
@@ -477,10 +711,36 @@
     if (!statusEl) {
       statusEl = document.createElement('div');
       statusEl.className = 'form-status';
+      // Without these the validation messages were painted silently: the text
+      // appeared above the form but nothing announced it, and nothing marked
+      // which field was at fault. The measurements form already works this way;
+      // this brings the homepage enquiry form in line with it.
+      statusEl.setAttribute('role', 'status');
+      statusEl.setAttribute('aria-live', 'polite');
       form.prepend(statusEl);
     }
 
-    form.addEventListener('submit', (e) => {
+    // Marks the offending fields, announces the reason, and puts the caret in
+    // the first one so a keyboard or screen-reader user is taken to the problem
+    // rather than left to hunt for it.
+    const fail = (message, fields) => {
+      statusEl.className = 'form-status error';
+      statusEl.textContent = message;
+      const bad = (fields || []).filter(Boolean);
+      bad.forEach((el) => el.setAttribute('aria-invalid', 'true'));
+      if (bad.length) bad[0].focus();
+    };
+
+    const clearInvalid = () => {
+      form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+    };
+
+    // A field stops being "the problem" as soon as it is edited.
+    form.querySelectorAll('input, textarea').forEach((el) => {
+      el.addEventListener('input', () => el.removeAttribute('aria-invalid'));
+    });
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       // Check anti-spam honeypot
@@ -494,30 +754,20 @@
       const companyInput = form.querySelector('[name="company"]');
       const emailInput = form.querySelector('[name="email"]');
 
-      if (!nameInput?.value.trim() || !companyInput?.value.trim() || !emailInput?.value.trim()) {
-        statusEl.className = 'form-status error';
-        statusEl.textContent = 'Please fill in all required fields (Name, Company, Email).';
+      clearInvalid();
+
+      const empty = [nameInput, companyInput, emailInput].filter((el) => !el?.value.trim());
+      if (empty.length) {
+        fail('Please fill in all required fields (Name, Company, Email).', empty);
         return;
       }
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(emailInput.value.trim())) {
-        statusEl.className = 'form-status error';
-        statusEl.textContent = 'Please enter a valid email address.';
+        fail('Please enter a valid email address, for example name@brand.com.', [emailInput]);
         return;
       }
 
-      // ----------------------------------------------------------------
-      // No submission endpoint is configured for this site, so the enquiry
-      // cannot be transmitted from the browser. Previously this branch told
-      // the visitor their enquiry "has been noted" and then cleared the form
-      // — the lead was destroyed and ROOTS never learned it existed.
-      //
-      // Instead: hand the completed enquiry to the visitor's email client so
-      // it genuinely reaches ROOTS, keep their entries on screen, and say
-      // plainly what happened. Set CONTACT_ENDPOINT to a POST URL later to
-      // enable real background submission.
-      // ----------------------------------------------------------------
       const get = (n) => {
         const el = form.querySelector('[name="' + n + '"]');
         return el && el.value.trim() ? el.value.trim() : '';
@@ -528,6 +778,8 @@
         ['Company / brand', get('company')],
         ['Email', get('email')],
         ['Phone', get('phone')],
+        ['Location / City', get('location')],
+        ['GST Number', get('gst')],
         ['Looking to manufacture', get('manufacture')],
         ['Project details', get('message')]
       ].filter((r) => r[1]).map((r) => r[0] + ': ' + r[1]);
@@ -538,30 +790,117 @@
         '?subject=' + encodeURIComponent(subject) +
         '&body=' + encodeURIComponent(body);
 
-      statusEl.className = 'form-status success';
-      statusEl.replaceChildren();
+      // Helper to open email app if Google Sheets is not configured or fails
+      const triggerEmailFallback = (customMessage) => {
+        statusEl.className = 'form-status hand-off';
+        statusEl.replaceChildren();
 
-      const intro = document.createElement('p');
-      intro.innerHTML =
-        'Your email app is opening with this enquiry ready to send — ' +
-        '<strong>it is not sent until you press send there.</strong>';
-      statusEl.appendChild(intro);
+        const intro = document.createElement('p');
+        intro.innerHTML = customMessage || (
+          'Your email app is opening with this enquiry ready to send — ' +
+          '<strong>it is not sent until you press send there.</strong>'
+        );
+        statusEl.appendChild(intro);
 
-      const fallback = document.createElement('p');
-      fallback.append('If nothing opened, ');
-      // The fallback link carries the whole enquiry too, so a visitor whose
-      // browser blocks the automatic handoff still sends a complete message.
-      const link = document.createElement('a');
-      link.href = mailto;
-      link.textContent = 'open the enquiry in your email app';
-      fallback.appendChild(link);
-      fallback.append(', or write to ' + CONTACT_EMAIL + ' / +91 18296 376 673. ');
-      fallback.append('Your details below are kept so nothing is lost.');
-      statusEl.appendChild(fallback);
+        const fallback = document.createElement('p');
+        fallback.append('If nothing opened, ');
+        const link = document.createElement('a');
+        link.href = mailto;
+        link.textContent = 'open the enquiry in your email app';
+        fallback.appendChild(link);
+        fallback.append(', or write to ' + CONTACT_EMAIL + ' / +91 82963 76673. ');
+        fallback.append('Your details below are kept so nothing is lost.');
+        statusEl.appendChild(fallback);
 
-      // Deliberately not calling form.reset(): the enquiry has not been
-      // delivered yet, so the visitor must keep what they typed.
-      window.location.href = mailto;
+        window.location.href = mailto;
+      };
+
+      // Check if a real Google Apps Script endpoint is configured
+      const isEndpointConfigured = GOOGLE_SHEET_URL &&
+        GOOGLE_SHEET_URL.trim().length > 0 &&
+        !GOOGLE_SHEET_URL.includes('YOUR_COPIED_URL');
+
+      if (!isEndpointConfigured) {
+        triggerEmailFallback(
+          'Google Sheet endpoint not configured yet. Opening your email app to send this enquiry — ' +
+          '<strong>it is not sent until you press send there.</strong>'
+        );
+        return;
+      }
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : 'SEND ENQUIRY';
+
+      try {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.setAttribute('aria-busy', 'true');
+          submitBtn.innerHTML = 'SENDING ENQUIRY... <span aria-hidden="true">⏳</span>';
+        }
+
+        // Prepare URL-encoded form data
+        // The endpoint's reply must be READ before anything is claimed.
+        //
+        // This previously posted with `mode: 'no-cors'`. An opaque response
+        // resolves successfully whatever the server did — 500, 404, a revoked
+        // deployment, an un-authorised script — because the browser refuses to
+        // let the page see it. The code then announced "Enquiry received
+        // successfully … recorded in our production schedule" and called
+        // form.reset(), so a failed submission looked exactly like a delivered
+        // one and the visitor's enquiry was wiped. That is the lead-destroying
+        // false confirmation this handler was rewritten to remove.
+        //
+        // google-apps-script.js answers {status:'success'|'error'} as JSON, so
+        // a real confirmation is available. Content-Type text/plain keeps the
+        // request "simple" so the browser sends no CORS preflight — Apps Script
+        // serves no OPTIONS handler — and doPost already falls back to parsing
+        // e.postData.contents as JSON when e.parameter is empty.
+        const payload = {};
+        new FormData(form).forEach((value, key) => { payload[key] = value; });
+
+        const response = await fetch(GOOGLE_SHEET_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+
+        const result = JSON.parse(await response.text());
+        if (!result || result.status !== 'success') {
+          throw new Error(result && result.message ? result.message : 'endpoint reported failure');
+        }
+
+        // Only now is the enquiry known to have been stored.
+        statusEl.className = 'form-status success';
+        statusEl.replaceChildren();
+
+        const successTitle = document.createElement('p');
+        const strongEl = document.createElement('strong');
+        strongEl.textContent = 'Enquiry sent.';
+        successTitle.appendChild(strongEl);
+        statusEl.appendChild(successTitle);
+
+        const successMsg = document.createElement('p');
+        successMsg.textContent = 'Thank you, ' + (get('name') || 'partner') +
+          '. We have your enquiry and a ROOTS representative will reply to ' + get('email') + ' shortly.';
+        statusEl.appendChild(successMsg);
+
+        // Safe to clear: the enquiry is on the server, not only on this screen.
+        form.reset();
+
+      } catch (err) {
+        // On network or transmission failure, provide instant fallback to email
+        triggerEmailFallback(
+          'We encountered an issue submitting your enquiry directly. We have opened your email app to ensure your message reaches us without delay.'
+        );
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.removeAttribute('aria-busy');
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+      }
     });
   }
 
@@ -574,6 +913,7 @@
     initWhatsAppReveal();
     initProcessSwitcher();
     initCapabilityAccordion();
+    initSectionScrollReveals();
     initBenefitSelector();
     initMobileMenu();
     initHeaderScroll();

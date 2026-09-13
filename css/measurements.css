@@ -21,8 +21,6 @@
   --ms-field: #ffffff;
   --ms-red: #c92f32;
   /* 4.8:1 on paper — accents and active states */
-  --ms-red-deep: #a93435;
-  /* brand red, kept for small text where more contrast is wanted */
   --ms-red-soft: rgba(201, 47, 50, 0.07);
 
   --ms-gutter: clamp(20px, 5vw, 88px);
@@ -175,10 +173,21 @@
   background: transparent;
   color: var(--ms-ink);
   cursor: pointer;
-  transition: background-color var(--trans-smooth), color var(--trans-smooth), border-color var(--trans-smooth);
+  transition:
+    background-color var(--trans-smooth),
+    color var(--trans-smooth),
+    border-color var(--trans-smooth),
+    transform var(--trans-smooth);
+  will-change: transform;
+}
+
+.ms-btn:active {
+  transform: scale(0.985) translateY(1px);
+  transition: transform 0.08s ease;
 }
 
 .ms-btn span {
+  display: inline-block;
   transition: transform var(--trans-smooth);
 }
 
@@ -187,23 +196,29 @@
   color: var(--roots-white);
 }
 
-.ms-btn--primary:hover {
-  background-color: var(--ms-red);
-  border-color: var(--ms-red);
-}
+@media (hover: hover) and (pointer: fine) {
+  .ms-btn--primary:hover {
+    background-color: var(--ms-red);
+    border-color: var(--ms-red);
+  }
 
-.ms-btn--primary:hover span {
-  transform: translateX(4px);
+  .ms-btn--primary:hover span {
+    transform: translateX(4px);
+  }
+
+  .ms-btn--quiet:hover {
+    border-color: var(--ms-ink);
+    color: var(--ms-ink);
+  }
+
+  .ms-btn--quiet:hover span {
+    transform: translateX(-3px);
+  }
 }
 
 .ms-btn--quiet {
   border-color: var(--ms-rule-strong);
   color: var(--ms-muted);
-}
-
-.ms-btn--quiet:hover {
-  border-color: var(--ms-ink);
-  color: var(--ms-ink);
 }
 
 .ms-btn:focus-visible {
@@ -529,7 +544,7 @@
   margin-left: auto;
   /* 34px sat below every other control on the page (the .ms-btn family is 48)
      while being the one control that only ever appears on touch screens. */
-  min-height: 40px;
+  min-height: 44px;
   padding: 10px 14px;
   font-family: var(--font-sans);
   font-size: 10px;
@@ -541,6 +556,12 @@
   border: 1px solid var(--ms-rule-strong);
   cursor: pointer;
   flex-shrink: 0;
+  transition: border-color var(--trans-smooth), transform var(--trans-press);
+}
+
+.ms-enlarge:active {
+  transform: scale(0.98) translateY(1px);
+  transition: transform var(--trans-press);
 }
 
 .ms-enlarge:hover {
@@ -828,10 +849,6 @@ body.ms-locked {
   stroke-width: 2;
 }
 
-.ms-dim.is-filled .ms-dimline {
-  stroke-dasharray: none;
-}
-
 /* --------------------------------------------------------------------------
    FORM
    -------------------------------------------------------------------------- */
@@ -949,9 +966,15 @@ body.ms-locked {
   padding-right: 40px;
 }
 
+/* #9b958c measured 2.97:1 on the #ffffff field — below the 4.5:1 body-text
+   minimum, and these placeholders carry real measuring guidance ("Flat, edge to
+   edge across the chest"), not decoration. --ms-graphite is the palette's own
+   tertiary ink at 5.5:1. The explicit opacity resets Firefox's UA default,
+   which would otherwise fade the corrected colour straight back down. */
 .ms-field input::placeholder,
 .ms-field textarea::placeholder {
-  color: #9b958c;
+  color: var(--ms-graphite);
+  opacity: 1;
 }
 
 .ms-field input:focus,
@@ -1496,6 +1519,17 @@ body.ms-locked {
   }
 }
 
+/* Ordered above the 900px block deliberately. Both queries match every
+   viewport <= 900px with byte-identical selectors, so whichever comes LAST
+   wins — with this block below, the narrower-gutter value at 900px never
+   applied and the comment there described behaviour that did not happen. */
+@media (max-width: 1100px) {
+  .ms-intro h1::before {
+    left: -20px;
+    width: 6px;
+  }
+}
+
 /* The hero keeps two columns down to 900px — it is more compact that way */
 @media (max-width: 900px) {
   .ms-intro-grid {
@@ -1528,13 +1562,6 @@ body.ms-locked {
   /* The gutter narrows below 900px; keep the bracket only where it fits */
   .ms-intro h1::before {
     left: -22px;
-    width: 6px;
-  }
-}
-
-@media (max-width: 1100px) {
-  .ms-intro h1::before {
-    left: -20px;
     width: 6px;
   }
 }

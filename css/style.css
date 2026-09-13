@@ -17,7 +17,27 @@
 
   /* Brand Accent Colors */
   --roots-red: #a93435;
-  --roots-red-hover: #c92f32;
+
+  /* The ROOTS red as TEXT and as a focus ring. #a93435 is 5.71:1 on ivory —
+     comfortably AA — but only 2.90:1 on the #111111 sections, which fails even
+     the 3:1 large-text floor and the 3:1 minimum for a focus indicator
+     (WCAG 1.4.3 / 1.4.11). Measured, not estimated.
+
+     --roots-red-on-dark is the same hue (359.5deg) and the same saturation
+     (52.9%) lifted from 43.3% to 53% lightness, so it reads as the same red:
+       on #111111  4.03:1   on #161616  3.86:1
+       on #121212  4.00:1   on #080808  4.27:1
+     That clears AA for the display headings, the focus ring and the accordion
+     arrow everywhere they appear.
+
+     Reaching 4.5:1 for the two small ordinals (.cap-num, .process-stage-num)
+     would need #ce6061, a visibly pinker red — a brand decision, not a code
+     one, so it is reported rather than applied.
+
+     Only `color` and `outline` resolve through --roots-red-text. Red fills and
+     borders still use --roots-red, so no surface changes colour. */
+  --roots-red-on-dark: #c7494a;
+  --roots-red-text: var(--roots-red);
 
   /* WCAG AA Compliant Muted Colors */
   --roots-muted: #5c5953;
@@ -38,23 +58,17 @@
   --font-serif: 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
 
-  /* 8-Point Spacing Token Foundation */
-  --space-2xs: 4px;
-  --space-xs: 8px;
-  --space-sm: 16px;
-  --space-md: 24px;
-  --space-lg: 32px;
-  --space-xl: 48px;
-  --space-2xl: 64px;
-  --space-3xl: 96px;
+  /* The only spacing token anything consumes. An eight-step scale was
+     declared here and never used — every margin and padding in the file is
+     hardcoded — so it documented a system the stylesheet does not follow. */
   --space-section: clamp(80px, 8vw, 130px);
 
   /* Motion & Transitions */
   --trans-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   --trans-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  --trans-press: 0.08s ease;
   --trans-slow: 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 
-  --max-content-width: 1440px;
 
   /* Page gutter. Mobile used a raw 6vw, which bottomed out at 19px on a 320px
      screen — too tight for an editorial layout. The floor holds it at 22px
@@ -83,6 +97,34 @@
   --img-story: url('../assets/images/roots-story-craftsmanship.webp');
   --img-quality: url('https://images.unsplash.com/photo-1598032895397-b9472444bf93?auto=format&fit=crop&w=2400&q=90');
   --img-closing: url('https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=2400&q=90');
+}
+
+/* A CSS background has no srcset, so without these the 2400px files were the
+   only ones that existed: a 390px phone downloaded 645KB of desktop photograph
+   for two decorative, grayscaled, overlaid backgrounds (measured — 256.7KB +
+   389.2KB, AVIF, Chrome 152). Narrowing the request by viewport costs nothing
+   visually because both images are behind `filter: grayscale(1)` and a dark
+   gradient overlay, and neither carries any detail the reader needs.
+
+   Measured totals for the pair, same negotiation:
+     w=2400&q=90  645KB   (>1400px)
+     w=1600&q=82  273KB   (≤1400px)
+     w=1200&q=80  136KB   (≤800px)
+   Only these two custom properties change; the sections themselves are
+   untouched, and swapping in ROOTS-owned photography still means editing one
+   value per tier. */
+@media (max-width: 1400px) {
+  :root {
+    --img-quality: url('https://images.unsplash.com/photo-1598032895397-b9472444bf93?auto=format&fit=crop&w=1600&q=82');
+    --img-closing: url('https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1600&q=82');
+  }
+}
+
+@media (max-width: 800px) {
+  :root {
+    --img-quality: url('https://images.unsplash.com/photo-1598032895397-b9472444bf93?auto=format&fit=crop&w=1200&q=80');
+    --img-closing: url('https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80');
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -151,7 +193,7 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--roots-red);
+  outline: 2px solid var(--roots-red-text);
   outline-offset: 3px;
 }
 
@@ -183,7 +225,7 @@ textarea:focus-visible {
   color: var(--roots-ink);
   font-weight: 600;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  outline: 2px solid var(--roots-red);
+  outline: 2px solid var(--roots-red-text);
 }
 
 /* Anti-spam honeypot protection */
@@ -219,7 +261,7 @@ h2 {
 
 h1 em,
 h2 em {
-  color: var(--roots-red);
+  color: var(--roots-red-text);
   font-style: italic;
 }
 
@@ -238,7 +280,7 @@ p {
 
 .eyebrow span,
 .section-kicker span {
-  color: var(--roots-red);
+  color: var(--roots-red-text);
 }
 
 .light {
@@ -259,24 +301,46 @@ p {
   display: inline-flex;
   gap: var(--control-gap);
   align-items: center;
-  transition: all var(--trans-smooth);
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color var(--trans-smooth),
+    border-color var(--trans-smooth),
+    color var(--trans-smooth),
+    transform var(--trans-smooth);
+  will-change: transform;
 }
 
-.button:hover,
-.nav-cta:hover {
-  background-color: var(--roots-red);
-  border-color: var(--roots-red);
-  color: var(--roots-white);
+.button:active,
+.nav-cta:active {
+  transform: scale(0.985) translateY(1px);
+  transition: transform var(--trans-press);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .button:hover,
+  .nav-cta:hover {
+    background-color: var(--roots-red-text);
+    border-color: var(--roots-red-text);
+    color: var(--roots-white);
+  }
+
+  .button:hover span,
+  .nav-cta:hover span {
+    transform: translateX(4px);
+  }
+}
+
+.button:focus-visible,
+.nav-cta:focus-visible {
+  outline: 2px solid var(--roots-red-text);
+  outline-offset: 3px;
 }
 
 .button span,
 .nav-cta span {
+  display: inline-block;
   transition: transform var(--trans-smooth);
-}
-
-.button:hover span,
-.nav-cta:hover span {
-  transform: translateX(3px);
 }
 
 .button-light {
@@ -310,13 +374,13 @@ p {
 }
 
 .talk span {
-  color: var(--roots-red);
+  color: var(--roots-red-text);
   transition: transform var(--trans-fast);
 }
 
 .talk:hover {
   color: var(--roots-white);
-  border-bottom-color: var(--roots-red);
+  border-bottom-color: var(--roots-red-text);
 }
 
 /* --------------------------------------------------------------------------
@@ -383,7 +447,7 @@ p {
 
 .site-header nav a:hover,
 .site-header nav a.active {
-  color: var(--roots-red);
+  color: var(--roots-red-text);
 }
 
 /* Mobile Hamburger Toggle */
@@ -391,17 +455,21 @@ p {
   display: none;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   gap: 5px;
-  width: 36px;
-  height: 36px;
-  padding: 4px;
+  width: 44px;
+  height: 44px;
+  padding: 10px 8px;
   cursor: pointer;
   z-index: 100;
+  background: transparent;
+  border: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-menu-toggle span {
   display: block;
-  width: 100%;
+  width: 24px;
   height: 1.5px;
   background-color: var(--roots-white);
   transition: all var(--trans-smooth);
@@ -426,12 +494,14 @@ p {
   inset: 0;
   background-color: var(--roots-black);
   z-index: 90;
-  padding: 100px var(--page-gutter) 40px;
+  padding: clamp(80px, 12vh, 108px) var(--page-gutter) clamp(24px, 4vh, 40px);
   flex-direction: column;
   justify-content: space-between;
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--trans-smooth);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobile-nav-drawer.is-open {
@@ -443,12 +513,12 @@ p {
 .mobile-nav-drawer nav {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: clamp(14px, 2.6vh, 24px);
 }
 
 .mobile-nav-drawer nav a {
   font-family: var(--font-serif);
-  font-size: 2.2rem;
+  font-size: clamp(1.6rem, 5.8vw, 2.2rem);
   letter-spacing: 0.05em;
   color: var(--roots-white);
   transition: color var(--trans-fast);
@@ -456,15 +526,16 @@ p {
 
 .mobile-nav-drawer nav a:hover,
 .mobile-nav-drawer nav a:focus-visible {
-  color: var(--roots-red);
+  color: var(--roots-red-text);
 }
 
 .mobile-nav-footer {
   border-top: 1px solid var(--roots-line-light);
-  padding-top: 24px;
+  padding-top: clamp(16px, 2.4vh, 24px);
+  margin-top: clamp(20px, 3vh, 32px);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 /* --------------------------------------------------------------------------
@@ -656,7 +727,7 @@ p {
 }
 
 .h-headline em {
-  color: var(--roots-red);
+  color: var(--roots-red-text);
   font-style: italic;
 }
 
@@ -697,29 +768,46 @@ p {
   background: transparent;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   white-space: nowrap;
+  cursor: pointer;
   transition:
     background-color 0.28s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-    color 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    color 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
-.h-cta-primary:hover,
+.h-cta-primary:active {
+  transform: scale(0.985) translateY(1px);
+  transition: transform var(--trans-press);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .h-cta-primary:hover {
+    background-color: var(--roots-red-text);
+    border-color: var(--roots-red-text);
+    color: var(--roots-white);
+  }
+
+  .h-cta-primary:hover .h-arrow {
+    transform: translateX(4px);
+  }
+}
+
 .h-cta-primary:focus-visible {
-  background-color: var(--roots-red);
-  border-color: var(--roots-red);
+  outline: 2px solid var(--roots-red-text);
+  outline-offset: 3px;
+  background-color: var(--roots-red-text);
+  border-color: var(--roots-red-text);
   color: var(--roots-white);
 }
 
 .h-arrow {
   display: inline-block;
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.h-cta-primary:hover .h-arrow,
-.h-cta-primary:focus-visible .h-arrow {
-  transform: translateX(5px);
 }
 
 /* Secondary CTA — understated editorial text link */
@@ -740,13 +828,27 @@ p {
   margin: -12px 0 0;
   transition:
     color 0.25s ease,
-    border-bottom-color 0.25s ease;
+    border-bottom-color 0.25s ease,
+    transform var(--trans-press);
 }
 
-.h-cta-secondary:hover,
+.h-cta-secondary:active {
+  transform: translateY(1px);
+  transition: transform var(--trans-press);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .h-cta-secondary:hover {
+    color: var(--roots-white);
+    border-bottom-color: var(--roots-red-text);
+  }
+}
+
 .h-cta-secondary:focus-visible {
+  outline: 2px solid var(--roots-red-text);
+  outline-offset: 3px;
   color: var(--roots-white);
-  border-bottom-color: var(--roots-red);
+  border-bottom-color: var(--roots-red-text);
 }
 
 /* ── Bottom metadata bar (absolute, full width) ── */
@@ -814,6 +916,21 @@ p {
   padding: var(--space-section) 8vw;
 }
 
+/* Every container that paints a dark ground behind red text. Redefining the
+   token here means no selector below needs to know which surface it is on —
+   the accent lightens wherever the ground goes dark, and nowhere else.
+   Kept next to .section-black so the list is maintained alongside the surfaces
+   it names. */
+.hero,
+.section-black,
+.quality,
+.closing,
+.mission-half.dark,
+.footer,
+.mobile-nav-drawer {
+  --roots-red-text: var(--roots-red-on-dark);
+}
+
 .section-kicker {
   margin-bottom: 56px;
 }
@@ -866,7 +983,7 @@ p {
 }
 
 .stat strong span {
-  color: var(--roots-red);
+  color: var(--roots-red-text);
 }
 
 .stat div {
@@ -927,7 +1044,12 @@ p {
   gap: 32px;
 }
 
-.process-head p {
+/* `:not(.eyebrow)` is load-bearing here, not decoration. The shared body-copy
+   rule in section 7 is `.process-head p:not(.eyebrow)` — specificity (0,2,1) —
+   and it sets the dark-surface colour. Without the same `:not()` this rule is
+   (0,1,1) and loses, so "One considered process…" rendered as #42403d on the
+   #111111 process section: 1.83:1, against the 4.5:1 that 15px text needs. */
+.process-head p:not(.eyebrow) {
   color: var(--roots-text-muted-light);
   max-width: 280px;
 }
@@ -940,22 +1062,48 @@ p {
 .process-visual {
   margin: 60px 0 0 0;
   position: relative;
-  /* Explicit width keeps the box definite. With `width: auto` the max-height
-     clamps the ratio by shrinking the frame instead of trimming its height,
-     which left 799px of dead space beside it at 2560px. */
   width: 100%;
   aspect-ratio: 16 / 9;
-  min-height: 400px;
-  max-height: 760px;
+  min-height: 380px;
+  max-height: 720px;
+  overflow: hidden;
+  background-color: #121212;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.process-img-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
-.process-visual img {
+.process-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   filter: grayscale(1);
-  animation: reveal 0.5s ease;
+  opacity: 0;
+  transform: scale(1.025);
+  transition: opacity 0.44s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.58s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.process-img.is-active {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 1;
+}
+
+.process-img.is-settling {
+  opacity: 0;
+  transform: scale(0.985);
+  z-index: 0;
 }
 
 .process-caption {
@@ -963,67 +1111,207 @@ p {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 24px 32px;
+  padding: clamp(24px, 3.5vw, 44px) clamp(24px, 3.5vw, 48px);
   display: flex;
-  gap: 22px;
+  gap: clamp(16px, 2vw, 24px);
   align-items: flex-start;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.88));
+  background: linear-gradient(180deg, transparent 0%, rgba(17, 17, 17, 0.4) 30%, rgba(17, 17, 17, 0.92) 85%, rgba(17, 17, 17, 0.98) 100%);
+  z-index: 2;
+  pointer-events: none;
 }
 
-.process-caption>span {
-  color: var(--roots-red);
-  font-size: 13px;
+.process-caption-body {
+  max-width: 680px;
+}
+
+.process-stage-num {
+  color: var(--roots-red-text);
+  font-size: clamp(12px, 1.1vw, 15px);
   font-weight: 600;
+  letter-spacing: 0.14em;
+  padding-top: 6px;
+  flex-shrink: 0;
+  display: inline-block;
+  transform: translateY(0);
+  opacity: 1;
+  transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.process-caption h3 {
-  font: 500 36px var(--font-serif);
+.process-title {
+  font: 500 clamp(26px, 3vw, 38px) var(--font-serif);
   color: var(--roots-white);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  transform: translateY(0);
+  opacity: 1;
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1) 0.03s,
+              transform 0.36s cubic-bezier(0.16, 1, 0.3, 1) 0.03s;
 }
 
-.process-caption p {
-  font-size: 13px;
-  color: rgba(250, 249, 246, 0.85);
-  line-height: 1.5;
+.process-desc {
+  font-size: clamp(12.5px, 1vw, 14.5px);
+  color: rgba(250, 249, 246, 0.88);
+  line-height: 1.55;
+  transform: translateY(0);
+  opacity: 1;
+  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.06s,
+              transform 0.40s cubic-bezier(0.16, 1, 0.3, 1) 0.06s;
+}
+
+/* Staggered exit state during stage transitions */
+.process-caption.is-transitioning .process-stage-num {
+  opacity: 0;
+  transform: translateY(4px);
+  transition-delay: 0s;
+}
+
+.process-caption.is-transitioning .process-title {
+  opacity: 0;
+  transform: translateY(6px);
+  transition-delay: 0s;
+}
+
+.process-caption.is-transitioning .process-desc {
+  opacity: 0;
+  transform: translateY(8px);
+  transition-delay: 0s;
 }
 
 .timeline {
-  display: flex;
-  border-top: 1px solid rgba(250, 249, 246, 0.24);
-  margin-top: 24px;
-  overflow-x: auto;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  border-top: 1px solid rgba(250, 249, 246, 0.18);
+  margin-top: 28px;
+  gap: 0;
+}
+
+/* Gliding Timeline Slider Bar */
+.timeline-slider-track {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  min-width: 100%;
+  width: max-content;
+  height: 2px;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+
+.timeline-slider-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--roots-red);
+  transform: translate3d(var(--slider-x, 0px), 0, 0);
+  width: var(--slider-w, 100px);
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+              width 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, width;
 }
 
 .timeline button {
-  flex: 1;
-  min-width: 130px;
-  padding: 18px 8px;
-  color: rgba(250, 249, 246, 0.65);
+  position: relative;
+  padding: 18px 12px 16px 0;
+  color: rgba(250, 249, 246, 0.55);
   background: none;
   border: 0;
-  border-bottom: 2px solid transparent;
   text-align: left;
   font-size: 10px;
+  font-weight: 500;
   letter-spacing: 0.12em;
-  transition: all var(--trans-fast);
+  line-height: 1.35;
+  cursor: pointer;
+  transition: color var(--trans-fast);
+}
+
+/* Fallback static indicator line for pre-JS / non-JS */
+.timeline:not(.has-slider) button::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 12px;
+  height: 2px;
+  background: transparent;
+  transition: background-color var(--trans-fast);
+}
+
+.timeline:not(.has-slider) button.active::before,
+.timeline:not(.has-slider) button[aria-selected="true"]::before {
+  background: var(--roots-red);
+}
+
+.timeline.has-slider button::before {
+  display: none;
 }
 
 .timeline button span {
   display: block;
-  margin-bottom: 10px;
-  color: var(--roots-red);
+  margin-bottom: 8px;
+  /* 0.45 composited to 4.36:1 on #111111 — just under the 4.5:1 floor for
+     11px text. 0.48 clears it at 4.80:1 and is a 3% opacity change. */
+  color: rgba(250, 249, 246, 0.48);
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.1em;
+  transition: color var(--trans-fast);
 }
 
 .timeline button:hover {
   color: var(--roots-white);
 }
 
+.timeline button:hover span {
+  color: var(--roots-white);
+}
+
 .timeline button.active,
 .timeline button[aria-selected="true"] {
   color: var(--roots-white);
-  border-bottom-color: var(--roots-red);
+  font-weight: 600;
+}
+
+.timeline button.active span,
+.timeline button[aria-selected="true"] span {
+  color: var(--roots-red-text);
+  font-weight: 700;
+}
+
+.timeline button:focus-visible {
+  outline: 2px solid var(--roots-red-text);
+  outline-offset: 3px;
+}
+
+.process-footer {
+  margin-top: 42px;
+  padding-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.process-footer::before,
+.process-footer::after {
+  content: '';
+  flex: 0 1 120px;
+  height: 1px;
+  background: rgba(250, 249, 246, 0.12);
+}
+
+.process-tagline {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--roots-text-muted-light);
+  white-space: nowrap;
 }
 
 /* --------------------------------------------------------------------------
@@ -1043,11 +1331,21 @@ p {
 
 .capability-item {
   border-top: 1px solid rgba(250, 249, 246, 0.2);
-  transition: background-color var(--trans-fast);
+  transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .capability-item:last-child {
   border-bottom: 1px solid rgba(250, 249, 246, 0.2);
+}
+
+.capability-item.is-open {
+  border-top-color: rgba(250, 249, 246, 0.38);
+  background-color: rgba(250, 249, 246, 0.02);
+}
+
+.capability-item.is-open + .capability-item {
+  border-top-color: rgba(250, 249, 246, 0.32);
 }
 
 .capability-trigger {
@@ -1058,22 +1356,47 @@ p {
   padding: 24px 0;
   text-align: left;
   color: var(--roots-white);
-  transition: color var(--trans-fast), padding-left var(--trans-fast);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              padding-left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .capability-trigger:hover,
 .capability-trigger:focus-visible {
-  color: var(--roots-red);
-  padding-left: 10px;
+  color: var(--roots-red-text);
+  padding-left: 8px;
+}
+
+.capability-item.is-open .capability-trigger {
+  color: var(--roots-white);
 }
 
 .cap-num {
   font-size: 11px;
   color: var(--roots-muted-light);
   font-weight: 500;
+  transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.capability-trigger h3 {
+.capability-item.is-open .cap-num {
+  color: var(--roots-red-text);
+  font-weight: 600;
+}
+
+/* The heading wraps the button, not the other way round (ARIA APG accordion).
+   <button> takes phrasing content only, so the previous <h3> inside it was
+   invalid, and role=button makes its children presentational — the six
+   capability titles were not exposed as headings at all, so they could not be
+   used to navigate the section. The wrapper carries no visual weight of its
+   own; .cap-title keeps the type it always had. */
+.cap-heading {
+  margin: 0;
+  font: inherit;
+}
+
+.cap-title {
   font: 500 clamp(1.6rem, 3.2vw, 3.4rem) var(--font-serif);
   letter-spacing: -0.02em;
 }
@@ -1081,18 +1404,50 @@ p {
 .capability-trigger .row-arrow {
   text-align: right;
   font-size: 16px;
-  transition: transform var(--trans-smooth);
+  display: inline-block;
+  transform-origin: center center;
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.capability-trigger[aria-expanded="true"] .row-arrow {
+.capability-trigger[aria-expanded="true"] .row-arrow,
+.capability-item.is-open .row-arrow {
   transform: rotate(180deg);
-  color: var(--roots-red);
+  color: var(--roots-red-text);
 }
 
+/* Physics-based Grid-Template-Rows Accordion */
 .capability-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+  visibility: hidden;
+  overflow: hidden;
+}
+
+.capability-item.is-open .capability-panel,
+.capability-panel.is-open {
+  grid-template-rows: 1fr;
+  visibility: visible;
+}
+
+.capability-panel-inner {
+  min-height: 0;
   padding: 0 0 24px 60px;
   max-width: 680px;
-  animation: reveal 0.3s ease;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.capability-item.is-open .capability-panel-inner,
+.capability-panel.is-open .capability-panel-inner {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.08s;
 }
 
 .capability-panel p {
@@ -1125,6 +1480,12 @@ p {
   overflow: hidden;
   color: var(--roots-white);
   display: block;
+  /* The tile's text is --roots-white, so on the ivory section a failed image
+     left the alt text white on cream — unreadable at the exact moment it is
+     the only thing the visitor has. The MEN'S DENIM tile still loads from a
+     third-party host, which makes this a live path, not a hypothetical one.
+     .process-visual already does the same thing with a #121212 ground. */
+  background-color: var(--roots-charcoal);
 }
 
 .focus-tile img {
@@ -1256,8 +1617,13 @@ p {
   font-size: clamp(3.4rem, 7.5vw, 7.8rem);
 }
 
-.quality-content>p,
-.closing-content>p {
+/* Same specificity trap as .process-head p above: `.closing-content>p:not(.eyebrow)`
+   in section 7 carries the dark-surface colour, so the closing CTA's one line of
+   copy — "Let's turn your creative vision into market-ready apparel." — was
+   #42403d over a dark photograph. The eyebrow is excluded either way; it takes
+   its colour from `.eyebrow.light`. */
+.quality-content>p:not(.eyebrow),
+.closing-content>p:not(.eyebrow) {
   max-width: 400px;
   color: var(--roots-text-muted-light);
   font-size: 15px;
@@ -1273,7 +1639,7 @@ p {
 
 .quality-words span::before {
   content: '—';
-  color: var(--roots-red);
+  color: var(--roots-red-text);
   margin-right: 10px;
 }
 
@@ -1320,13 +1686,13 @@ p {
 .benefit-item:hover,
 .benefit-item:focus-visible {
   padding-left: 15px;
-  color: var(--roots-red);
+  color: var(--roots-red-text);
 }
 
 .benefit-item.selected strong,
 .benefit-item:hover strong,
 .benefit-item:focus-visible strong {
-  color: var(--roots-red);
+  color: var(--roots-red-text);
 }
 
 /* --------------------------------------------------------------------------
@@ -1444,7 +1810,7 @@ p {
 
 .contact-details a:hover,
 .contact-details a:focus-visible {
-  color: var(--roots-red);
+  color: var(--roots-red-text);
 }
 
 .contact form {
@@ -1478,7 +1844,20 @@ p {
 
 .contact input:focus,
 .contact textarea:focus {
-  border-color: var(--roots-red);
+  border-color: var(--roots-red-text);
+}
+
+/* `outline: 0` on the base rule above is (0,1,1) — the same specificity as the
+   global `input:focus-visible` ring in section 2 — and it comes later, so it
+   won. The eight enquiry fields were the only controls on the site with no
+   focus ring at all; a 1px underline changing colour is a much weaker cue than
+   every other control gets, and inconsistent with them. This restores the house
+   indicator at a specificity the reset cannot beat, while keeping the underline
+   colour change as a second, quieter signal. */
+.contact input:focus-visible,
+.contact textarea:focus-visible {
+  outline: 2px solid var(--roots-red-text);
+  outline-offset: 3px;
 }
 
 .form-row {
@@ -1504,10 +1883,16 @@ p {
   border-bottom: 1px solid currentColor;
 }
 
-/* This state is a hand-off, not a confirmation: the enquiry has not been
-   delivered until the visitor sends it. Generic green read as "sent" and was
-   off-palette for an ink/ivory/red brand. */
+/* Confirmed submission saved to Google Sheets */
 .form-status.success {
+  display: block;
+  background-color: rgba(30, 80, 40, 0.08);
+  color: #1b4d22;
+  border-left: 3px solid #2e7d32;
+}
+
+/* Email client hand-off fallback */
+.form-status.hand-off {
   display: block;
   background-color: rgba(169, 52, 53, 0.06);
   color: var(--roots-ink);
@@ -1517,8 +1902,14 @@ p {
 .form-status.error {
   display: block;
   background-color: rgba(169, 52, 53, 0.1);
-  color: var(--roots-red);
+  color: var(--roots-red-text);
   border-left: 3px solid var(--roots-red);
+}
+
+.contact form button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -1592,7 +1983,7 @@ p {
 
 .footer nav a:hover,
 .footer nav a:focus-visible {
-  color: var(--roots-red);
+  color: var(--roots-red-text);
 }
 
 .footer-contact {
@@ -1610,7 +2001,7 @@ p {
 
 .footer-contact a:hover,
 .footer-contact a:focus-visible {
-  color: var(--roots-red);
+  color: var(--roots-red-text);
 }
 
 .footer-bottom {
@@ -1626,20 +2017,50 @@ p {
 /* --------------------------------------------------------------------------
    20. KEYFRAME ANIMATIONS
    -------------------------------------------------------------------------- */
-@keyframes reveal {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
+/* --------------------------------------------------------------------------
+   21a. PROCESS TIMELINE HORIZONTAL RAIL (TABLET & MOBILE)
+   Ensures the 9 manufacturing stages never compress below comfortable legibility.
+   -------------------------------------------------------------------------- */
+@media (max-width: 1080px) {
+  .timeline {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(250, 249, 246, 0.22) transparent;
   }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .timeline::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  .timeline::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .timeline::-webkit-scrollbar-thumb {
+    background: rgba(250, 249, 246, 0.22);
+    border-radius: 2px;
+  }
+
+  .timeline button {
+    flex: 0 0 auto;
+    min-width: 130px;
+    max-width: 160px;
+    scroll-snap-align: start;
+    padding-right: 0;
+  }
+
+  .timeline button::before {
+    right: 0;
   }
 }
 
 /* --------------------------------------------------------------------------
-   21. RESPONSIVE MEDIA QUERIES (TABLET & MOBILE)
+   21b. RESPONSIVE MEDIA QUERIES (TABLET & MOBILE)
    -------------------------------------------------------------------------- */
 @media (max-width: 1024px) {
 
@@ -1762,7 +2183,24 @@ p {
   .h-ctas {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 10px;
+  }
+
+  .h-cta-primary {
+    min-height: 44px;
+  }
+
+  .h-cta-secondary {
+    margin: 0;
+    padding: 10px 0;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .button,
+  .nav-cta {
+    min-height: 44px;
   }
 
   .hero-meta {
@@ -1821,10 +2259,52 @@ p {
   }
 
   .process-visual {
-    margin-top: 40px;
+    margin-top: 36px;
     aspect-ratio: 4 / 3;
-    min-height: 300px;
-    max-height: 520px;
+    min-height: 280px;
+    max-height: 500px;
+  }
+
+  .process-caption {
+    padding: 20px 18px;
+    gap: 14px;
+  }
+
+  .process-caption h3 {
+    font-size: 24px;
+    margin-bottom: 4px;
+  }
+
+  .process-caption p {
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+
+  .timeline {
+    margin-top: 20px;
+    gap: 18px;
+  }
+
+  .timeline button {
+    min-width: 125px;
+    font-size: 9.5px;
+    padding-top: 14px;
+  }
+
+  .timeline button span {
+    font-size: 10.5px;
+    margin-bottom: 6px;
+  }
+
+  .process-footer {
+    margin-top: 32px;
+    padding-top: 16px;
+    gap: 16px;
+  }
+
+  .process-tagline {
+    font-size: 10px;
+    letter-spacing: 0.22em;
   }
 
   .capabilities-head .button {
@@ -1840,7 +2320,7 @@ p {
     padding: 18px 0;
   }
 
-  .capability-panel {
+  .capability-panel-inner {
     padding-left: 45px;
   }
 
@@ -2066,6 +2546,69 @@ p {
   .footer nav a {
     padding: 6px 0;
   }
+
+  /* The section-16 clamp is `clamp(3.4rem, 7.5vw, 7.8rem)`, and below ~453px
+     the 7.5vw preferred size is under the 3.4rem floor, so the floor is what
+     renders — a fixed 54.4px that never gets smaller however narrow the screen
+     is. "CHECKPOINT." sets ~300px at that size inside a 276px content box at
+     320px, so the last glyphs were cut off by the section's own overflow:hidden.
+     A floor scaled to the viewport keeps the same editorial weight and lets the
+     longest word fit. 12vw meets 3.4rem at 453px, so nothing changes above that. */
+  .quality-content h2,
+  .closing-content h2 {
+    font-size: clamp(2.45rem, 12vw, 3.4rem);
+  }
+
+  .process-visual {
+    aspect-ratio: 1 / 1;
+    min-height: 260px;
+    max-height: 380px;
+  }
+
+  .process-caption {
+    padding: 16px 14px;
+    gap: 10px;
+  }
+
+  .process-caption h3 {
+    font-size: 20px;
+  }
+
+  .process-caption p {
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+
+  .timeline button {
+    min-width: 115px;
+  }
+
+  .process-footer::before,
+  .process-footer::after {
+    flex: 0 1 36px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   21c. SUBTLE EDITORIAL SCROLL REVEALS
+   -------------------------------------------------------------------------- */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-on-scroll.reveal-quiet {
+  transform: translateY(8px);
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.50s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* --------------------------------------------------------------------------
@@ -2101,6 +2644,24 @@ p {
   .h-scroll-line {
     animation: none !important;
     opacity: 0.4 !important;
+  }
+
+  .reveal-on-scroll {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .process-img,
+  .process-stage-num,
+  .process-title,
+  .process-desc,
+  .timeline-slider-bar,
+  .capability-panel,
+  .capability-panel-inner,
+  .capability-trigger .row-arrow {
+    transition: none !important;
+    transform: none !important;
   }
 
   /* The loading screen's reduced-motion behaviour is defined with the rest of
@@ -2328,14 +2889,13 @@ p {
     0 2px 6px rgba(0, 0, 0, 0.22),
     0 8px 24px rgba(0, 0, 0, 0.28);
   color: var(--roots-white);
-  /* Subtle organic floating breath: 6s smooth ease-in-out */
-  animation: waRestFloat 6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  -webkit-tap-highlight-color: transparent;
   transition:
-    background-color 340ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 340ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 340ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 340ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 460ms cubic-bezier(0.16, 1, 0.3, 1);
+    background-color 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .wa-float-icon {
@@ -2344,20 +2904,23 @@ p {
   height: 20px;
   fill: currentColor;
   display: block;
-  transition: transform 340ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Hover & Focus Interaction — Refined luxury emerald tone + micro lift */
 .wa-float:hover,
 .wa-float:focus-visible {
-  animation-play-state: paused;
   background-color: #075e54;
   border-color: #0d7065;
-  transform: translateY(-3px) scale(1.03);
+  transform: translateY(-2px) scale(1.02);
   box-shadow:
-    0 4px 10px rgba(0, 0, 0, 0.2),
-    0 14px 32px rgba(7, 94, 84, 0.32),
-    0 0 16px rgba(7, 94, 84, 0.2);
+    0 4px 12px rgba(0, 0, 0, 0.24),
+    0 10px 24px rgba(7, 94, 84, 0.30);
+}
+
+.wa-float:active {
+  transform: scale(0.95);
+  transition-duration: 120ms;
 }
 
 /* Subtle micro-motion on WhatsApp glyph */
@@ -2367,7 +2930,7 @@ p {
 }
 
 .wa-float:focus-visible {
-  outline: 2px solid var(--roots-red);
+  outline: 2px solid var(--roots-red-text);
   outline-offset: 3px;
 }
 
@@ -2442,22 +3005,6 @@ p {
   }
 }
 
-/* Keyframes: Resting Floating Wave (subtle 2.5px travel) */
-@keyframes waRestFloat {
-  0%, 100% {
-    transform: translateY(0);
-    box-shadow:
-      0 2px 6px rgba(0, 0, 0, 0.22),
-      0 8px 24px rgba(0, 0, 0, 0.28);
-  }
-  50% {
-    transform: translateY(-2.5px);
-    box-shadow:
-      0 4px 8px rgba(0, 0, 0, 0.18),
-      0 12px 28px rgba(0, 0, 0, 0.32);
-  }
-}
-
 /* Keyframes: Smooth Entrance Animation (run once past hero) */
 @keyframes waEntrance {
   0% {
@@ -2475,7 +3022,7 @@ p {
 }
 
 .wa-float.has-entered {
-  animation: waEntrance 750ms cubic-bezier(0.16, 1, 0.3, 1) both, waRestFloat 6s cubic-bezier(0.45, 0.05, 0.55, 0.95) 750ms infinite;
+  animation: waEntrance 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Held back while hero is on screen */
@@ -2486,11 +3033,67 @@ p {
   animation: none;
 }
 
-/* Stand aside during input focus on forms */
+/* Stand aside during mobile drawer open, technical drawing enlargement, or input focus */
+body.mobile-nav-open .wa-float,
+body.ms-locked .wa-float,
+.mobile-nav-drawer.is-open ~ .wa-float,
 body:has(input:not([type="radio"]):not([type="checkbox"]):not([type="button"]):not([type="submit"]):focus, textarea:focus, select:focus) .wa-float {
-  opacity: 0;
-  transform: translateY(8px);
-  pointer-events: none;
+  opacity: 0 !important;
+  transform: translateY(12px) scale(0.92) !important;
+  pointer-events: none !important;
+}
+
+/* Compact adjustments for landscape mobile phones */
+@media (max-height: 500px) and (orientation: landscape) {
+  .site-header {
+    padding: 8px var(--page-gutter);
+  }
+
+  .brand-mark {
+    height: 36px;
+  }
+
+  .brand-mark img {
+    max-height: 36px;
+  }
+
+  .nav-cta {
+    display: none;
+  }
+
+  .mobile-nav-drawer {
+    padding: 64px var(--page-gutter) 20px;
+  }
+
+  .mobile-nav-drawer nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 24px;
+  }
+
+  .mobile-nav-drawer nav a {
+    font-size: 1.35rem;
+  }
+
+  .mobile-nav-footer {
+    padding-top: 14px;
+    margin-top: 14px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .wa-float {
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    right: 12px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .wa-float-icon {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 /* Reduced motion support */

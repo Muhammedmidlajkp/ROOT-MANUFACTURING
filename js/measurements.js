@@ -5,14 +5,15 @@
  * -------------------------------------------------------------------------
  * BACKEND INTEGRATION REQUIRED
  * -------------------------------------------------------------------------
- * ROOTS currently has NO submission endpoint. The homepage contact form has
- * no `action`, no fetch and no mail transport — it only prints a thank-you
- * message client-side, which means those enquiries are never delivered.
+ * ROOTS currently has NO submission endpoint. Neither this page nor the
+ * homepage contact form can transmit anything from the browser; both hand the
+ * completed enquiry to the visitor's own mail client and say so plainly.
  *
- * This page does NOT repeat that. Until `CONFIG.endpoint` is set to a real
- * URL, the page will never claim the specification reached ROOTS. It builds
- * the payload, validates it, and hands the user three delivery routes that
- * genuinely work offline (download, clipboard, prefilled email).
+ * Until `CONFIG.endpoint` is set to a real URL, this page will never claim the
+ * specification reached ROOTS. It builds the payload, validates it, and hands
+ * the user delivery routes that genuinely work offline (download, clipboard,
+ * prefilled email) — only the email route puts it in front of ROOTS, and only
+ * once the visitor presses send there.
  *
  * To enable real submission, set CONFIG.endpoint to a POST URL that accepts
  * JSON. Server-side validation, spam protection, rate limiting and CSRF
@@ -316,6 +317,55 @@
   /* =======================================================================
      3. UNIT SWITCHING (converts values already entered)
      ======================================================================= */
+  /* Canonical centimetre value per field, kept off-screen.
+     -----------------------------------------------------------------------
+     The visible input is a ROUNDED view (one decimal). Converting the visible
+     number and writing it back made that rounded view the new source of truth,
+     so every unit toggle lost precision permanently and irreversibly:
+
+         54 cm  ->  21.3 in  ->  54.1 cm     (1 mm gained, never recoverable)
+         3.5 cm ->   1.4 in  ->   3.6 cm     (1 mm gained on a collar height)
+
+     A garment specification that silently edits the client's own figures is
+     worse than one that refuses to convert. So the centimetre value the user
+     actually committed is stored here, and the field is re-rendered from it —
+     a cm -> in -> cm round trip now returns exactly what was typed. */
+  var canonicalCm = {};
+
+  // What renderFromCanonical last wrote into each field. A field still showing
+  // exactly that string has not been edited since, so its canonical value is
+  // still authoritative and must NOT be re-derived from the rounded display —
+  // doing so reintroduces the very drift this exists to prevent.
+  var lastRendered = {};
+
+  function readCanonical(input, id) {
+    var v = parseFloat(input.value);
+    if (input.value === '' || isNaN(v)) {
+      delete canonicalCm[id];
+      delete lastRendered[id];
+      return;
+    }
+    canonicalCm[id] = currentUnit === 'in' ? v * CM_PER_INCH : v;
+    lastRendered[id] = input.value;
+  }
+
+  function renderFromCanonical(id, unit) {
+    var input = form.querySelector('[data-measure-input="' + id + '"]');
+    if (!input) return;
+    if (!(id in canonicalCm)) { input.value = ''; delete lastRendered[id]; return; }
+    var shown = unit === 'in' ? canonicalCm[id] / CM_PER_INCH : canonicalCm[id];
+    input.value = String(Math.round(shown * 10) / 10);
+    lastRendered[id] = input.value;
+  }
+
+  function bindCanonicalTracking() {
+    MEASUREMENTS.forEach(function (m) {
+      var input = form.querySelector('[data-measure-input="' + m.id + '"]');
+      if (!input) return;
+      input.addEventListener('input', function () { readCanonical(input, m.id); });
+    });
+  }
+
   function bindUnitToggle() {
     Array.prototype.forEach.call(form.querySelectorAll('input[name="unit"]'), function (radio) {
       radio.addEventListener('change', function () {
@@ -323,16 +373,19 @@
         var next = radio.value;
         if (next === currentUnit) return;
 
+        // Anything typed but not yet seen by the input listener (autofill,
+        // paste, a programmatic set) is captured before the unit flips — but
+        // ONLY where the field no longer matches what was last rendered into
+        // it. Re-reading an untouched field would take the rounded display as
+        // the new truth and drift by a millimetre on every toggle.
         MEASUREMENTS.forEach(function (m) {
           var input = form.querySelector('[data-measure-input="' + m.id + '"]');
-          if (!input || input.value === '') return;
-          var v = parseFloat(input.value);
-          if (isNaN(v)) return;
-          var converted = next === 'in' ? v / CM_PER_INCH : v * CM_PER_INCH;
-          input.value = String(Math.round(converted * 10) / 10);
+          if (input && input.value !== lastRendered[m.id]) readCanonical(input, m.id);
         });
 
         currentUnit = next;
+        MEASUREMENTS.forEach(function (m) { renderFromCanonical(m.id, next); });
+
         Array.prototype.forEach.call(form.querySelectorAll('[data-unit-label]'), function (el) {
           el.textContent = currentUnit;
         });
@@ -404,7 +457,12 @@
         return;
       }
 
-      if (!/^\d*\.?\d+$/.test(raw)) {
+      // The optional sign matters. Without it "-5" failed this shape test and
+      // was reported as "must be a number… remove any units or letters", which
+      // is untrue and unactionable — it is a number. Letting a signed value
+      // through hands it to the `value <= 0` check below, which says the thing
+      // that is actually wrong with it.
+      if (!/^-?\d*\.?\d+$/.test(raw)) {
         showError(m.id, m.label + ' must be a number, for example 54.0. Remove any units or letters.');
         errors.push(input);
         return;
@@ -627,8 +685,15 @@
     callout.className = 'ms-callout';
     callout.innerHTML =
       '<h3>One more step to send it</h3>' +
+      // "and it reaches us straight away" was not true of three of the four
+      // options: download, copy and save-JSON all leave the file on the
+      // visitor's own device. Only the email route puts it in front of ROOTS,
+      // and only once the visitor presses send in their mail client. Saying
+      // otherwise is the same lead-loss failure the top of this file exists to
+      // prevent.
       '<p>Your specification is complete, but it has <strong>not</strong> been sent to ROOTS yet. ' +
-      'Choose a delivery option below and it reaches us straight away.</p>' +
+      'Use <strong>Open email to ROOTS</strong> to send it — the other options save a copy to ' +
+      'your device, which you can then attach to an email or a WhatsApp message yourself.</p>' +
       '<p>Keep your reference number — quote it in any follow-up and we can match your enquiry immediately.</p>';
     resultBody.appendChild(callout);
 
@@ -813,6 +878,8 @@
     clearBtn.addEventListener('click', function () {
       form.reset();
       currentUnit = 'cm';
+      canonicalCm = {};
+      lastRendered = {};
       Array.prototype.forEach.call(form.querySelectorAll('[data-unit-label]'), function (el) {
         el.textContent = 'cm';
       });
@@ -879,6 +946,7 @@
      INIT
      ======================================================================= */
   buildFields();
+  bindCanonicalTracking();
   bindInteraction();
   bindUnitToggle();
   bindEnlarge();
