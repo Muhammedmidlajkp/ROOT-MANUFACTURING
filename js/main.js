@@ -12,7 +12,7 @@
 
   // Google Sheets Webhook URL: Replace with your deployed Google Apps Script Web App URL.
   // Instructions are in google-apps-script.js
-  const GOOGLE_SHEET_URL = '';
+  const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzAuIVChWKgNyISkzhc2uXSMK55eT3yduKzA5TsJ5pn-mZuQEui5FCD3e6CU3mDk6-Jpg/exec';
 
   // ------------------------------------------------------------------------
   // 0. Homepage entry state — a refresh starts at the hero
@@ -169,62 +169,72 @@
   // 1. Process Stages Interactive Switcher with Keyboard Arrow Navigation
   // ------------------------------------------------------------------------
   // Candidate widths offered to the browser for the process visual.
-  const PROCESS_WIDTHS = [600, 900, 1200, 1600, 2200];
+  // The nine stage photographs are self-hosted WebP. 1600 is the top tier and
+  // carries no suffix; the layout asks for 84vw, so 1600 covers a 1x desktop and
+  // 1200 covers a 2x phone. Previously these were Unsplash URLs and the width was
+  // a query parameter the CDN resolved — now each width is a file that must exist.
+  const PROCESS_WIDTHS = [600, 1200, 1600];
+  const PROCESS_TOP = 1600;
+
+  // base -> "…-600.webp 600w, …-1200.webp 1200w, ….webp 1600w"
+  const processSrcset = (base) =>
+    PROCESS_WIDTHS.map((w) => `${base}${w === PROCESS_TOP ? '' : '-' + w}.webp ${w}w`).join(', ');
+  const processSrc = (base) => `${base}-1200.webp`;
 
   const processStages = [
     {
       name: 'CONFIRM THE ORDER',
       copy: 'Customer order received and confirmed with all details.',
-      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=85',
-      alt: 'Customer garment specification and order details being reviewed'
+      image: 'assets/images/process/roots-process-01-order',
+      alt: 'Two people reviewing handwritten notes beside a laptop'
     },
     {
       name: 'PRODUCTION PLANNING',
       copy: 'Plan production schedule, allocate resources, and set timelines.',
-      image: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&q=85',
-      alt: 'Production schedule planning, resource allocation and project timelines'
+      image: 'assets/images/process/roots-process-02-planning',
+      alt: 'A hand sketching a planning diagram on paper'
     },
     {
       name: 'RAW MATERIALS SOURCING',
       copy: 'Source high-quality denim fabric, trims, buttons, labels and other materials.',
-      image: 'https://images.unsplash.com/photo-1621882844178-fa8129633ce4?auto=format&fit=crop&q=85',
-      alt: 'Rolls of high-quality denim fabric and raw apparel materials'
+      image: 'assets/images/process/roots-process-03-sourcing',
+      alt: 'Rolls of undyed natural-fibre fabric stacked in storage'
     },
     {
       name: 'DESIGNING',
       copy: 'Create garment designs, patterns and tech packs.',
-      image: 'https://images.unsplash.com/photo-1721664195489-7448042bf305?auto=format&fit=crop&q=85',
+      image: 'assets/images/process/roots-process-04-designing',
       alt: 'A hand tracing a garment design pattern and technical drawing'
     },
     {
       name: 'SAMPLING',
       copy: 'Develop samples, get approvals and make necessary changes.',
-      image: 'https://images.unsplash.com/photo-1578353022142-09264fd64295?auto=format&fit=crop&q=85',
-      alt: 'Sample garment development with thread, pattern cuts and measuring tape'
+      image: 'assets/images/process/roots-process-05-sampling',
+      alt: 'Thread cones, a ruler and shears laid out on a work surface'
     },
     {
       name: 'BULK PRODUCTION',
       copy: 'Cutting, stitching and assembling in bulk as per approved sample.',
-      image: 'https://images.unsplash.com/photo-1589793463357-5fb813435467?auto=format&fit=crop&q=85',
-      alt: 'Rows of operators cutting and stitching apparel in bulk on factory floor'
+      image: 'assets/images/process/roots-process-06-production',
+      alt: 'An overhead garment conveyor rail running through a production floor'
     },
     {
       name: 'WASHING',
       copy: 'Apply washing, bleaching and special effects for desired look and feel.',
-      image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?auto=format&fit=crop&q=85',
-      alt: 'Industrial garment washing and special wash effects processing'
+      image: 'assets/images/process/roots-process-07-washing',
+      alt: 'A basket of laundered garments'
     },
     {
       name: 'FINISHING',
       copy: 'Ironing, quality check, tagging, folding and final inspection.',
-      image: 'https://images.unsplash.com/photo-1772291320136-7bfb40006088?auto=format&fit=crop&q=85',
-      alt: 'Garment ironing, quality check inspection, tagging and folding'
+      image: 'assets/images/process/roots-process-08-finishing',
+      alt: 'Hands pressing a seam on a white garment'
     },
     {
       name: 'DELIVERY',
       copy: 'Pack, label and ship to customers on time.',
-      image: 'https://images.unsplash.com/photo-1549040634-41fbcd2eb623?auto=format&fit=crop&q=85',
-      alt: 'Finished, pressed, labeled and packed garments ready for timely delivery'
+      image: 'assets/images/process/roots-process-09-delivery',
+      alt: 'Finished shirts hanging on a rail'
     }
   ];
 
@@ -340,9 +350,9 @@
       visualContainer.setAttribute('aria-labelledby', buttons[index].id);
 
       if (prefersReduced()) {
-        imgActive.srcset = PROCESS_WIDTHS.map((w) => `${stage.image}&w=${w} ${w}w`).join(', ');
+        imgActive.srcset = processSrcset(stage.image);
         imgActive.sizes = '(max-width: 800px) 88vw, 84vw';
-        imgActive.src = `${stage.image}&w=1200`;
+        imgActive.src = processSrc(stage.image);
         imgActive.alt = stage.alt;
         if (num) num.textContent = String(index + 1).padStart(2, '0');
         if (title) title.textContent = stage.name;
@@ -355,9 +365,9 @@
 
       // Update incoming image layer
       if (imgIncoming) {
-        imgIncoming.srcset = PROCESS_WIDTHS.map((w) => `${stage.image}&w=${w} ${w}w`).join(', ');
+        imgIncoming.srcset = processSrcset(stage.image);
         imgIncoming.sizes = '(max-width: 800px) 88vw, 84vw';
-        imgIncoming.src = `${stage.image}&w=1200`;
+        imgIncoming.src = processSrc(stage.image);
         imgIncoming.alt = stage.alt;
         imgIncoming.removeAttribute('aria-hidden');
 
@@ -375,8 +385,8 @@
         imgIncoming = temp;
         imgIncoming.classList.add('is-incoming');
       } else {
-        imgActive.srcset = PROCESS_WIDTHS.map((w) => `${stage.image}&w=${w} ${w}w`).join(', ');
-        imgActive.src = `${stage.image}&w=1200`;
+        imgActive.srcset = processSrcset(stage.image);
+        imgActive.src = processSrc(stage.image);
         imgActive.alt = stage.alt;
       }
 
@@ -736,8 +746,9 @@
     };
 
     // A field stops being "the problem" as soon as it is edited.
-    form.querySelectorAll('input, textarea').forEach((el) => {
+    form.querySelectorAll('input, textarea, select').forEach((el) => {
       el.addEventListener('input', () => el.removeAttribute('aria-invalid'));
+      el.addEventListener('change', () => el.removeAttribute('aria-invalid'));
     });
 
     form.addEventListener('submit', async (e) => {
@@ -905,6 +916,123 @@
   }
 
   // ------------------------------------------------------------------------
+  // 8. Luxury Custom Select Component
+  // ------------------------------------------------------------------------
+  function initCustomSelect() {
+    const wrap = document.getElementById('custom-manufacture-wrap');
+    if (!wrap) return;
+
+    const trigger = wrap.querySelector('.custom-select-trigger');
+    const valueEl = wrap.querySelector('.custom-select-value');
+    const options = wrap.querySelectorAll('.custom-select-option');
+    const nativeSelect = wrap.querySelector('#contact-manufacture');
+    const form = wrap.closest('form');
+
+    if (!trigger || !valueEl || !nativeSelect) return;
+
+    const closeDropdown = () => {
+      wrap.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+    };
+
+    const openDropdown = () => {
+      wrap.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+      const selected = wrap.querySelector('.custom-select-option.is-selected') || options[0];
+      if (selected) selected.focus();
+    };
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = wrap.classList.contains('is-open');
+      if (isOpen) {
+        closeDropdown();
+      } else {
+        openDropdown();
+      }
+    });
+
+    const selectOption = (opt) => {
+      const val = opt.getAttribute('data-value') || '';
+      const labelText = val ? opt.querySelector('.opt-label')?.textContent.trim() : 'Select apparel category...';
+
+      // Sync native select value
+      nativeSelect.value = val;
+      nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+      // Update trigger UI
+      valueEl.textContent = labelText;
+      trigger.setAttribute('data-selected', val ? 'true' : 'false');
+
+      // Update option states
+      options.forEach((o) => {
+        const isThis = o === opt;
+        o.classList.toggle('is-selected', isThis);
+        o.setAttribute('aria-selected', isThis ? 'true' : 'false');
+      });
+
+      closeDropdown();
+      trigger.focus();
+    };
+
+    options.forEach((opt) => {
+      opt.setAttribute('tabindex', '0');
+      opt.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectOption(opt);
+      });
+
+      opt.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectOption(opt);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const next = opt.nextElementSibling;
+          if (next && next.classList.contains('custom-select-option')) next.focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const prev = opt.previousElementSibling;
+          if (prev && prev.classList.contains('custom-select-option')) prev.focus();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          closeDropdown();
+          trigger.focus();
+        }
+      });
+    });
+
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openDropdown();
+      } else if (e.key === 'Escape') {
+        closeDropdown();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!wrap.contains(e.target)) {
+        closeDropdown();
+      }
+    });
+
+    if (form) {
+      form.addEventListener('reset', () => {
+        setTimeout(() => {
+          valueEl.textContent = 'Select apparel category...';
+          trigger.setAttribute('data-selected', 'false');
+          options.forEach((o, i) => {
+            const isPlaceholder = i === 0;
+            o.classList.toggle('is-selected', isPlaceholder);
+            o.setAttribute('aria-selected', isPlaceholder ? 'true' : 'false');
+          });
+        }, 0);
+      });
+    }
+  }
+
+  // ------------------------------------------------------------------------
   // DOM Ready Initialization
   // ------------------------------------------------------------------------
   document.addEventListener('DOMContentLoaded', () => {
@@ -919,6 +1047,7 @@
     initHeaderScroll();
     initScrollSpy();
     initContactForm();
+    initCustomSelect();
   });
 })();
 

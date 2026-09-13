@@ -83,9 +83,48 @@ function doPost(e) {
 
     sheet.appendRow(row);
 
+    // Send instant email notification to midlaj2636@gmail.com
+    try {
+      var recipient = 'midlaj2636@gmail.com';
+      var subject = 'New ROOTS Manufacturing Inquiry: ' + (p.company || p.name || 'Website Lead');
+
+      var htmlBody = 
+        '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e5e5; border-radius: 6px; overflow: hidden;">' +
+          '<div style="background-color: #111111; color: #ffffff; padding: 18px 24px;">' +
+            '<h2 style="margin: 0; font-size: 16px; letter-spacing: 1px; font-weight: 600;">ROOTS APPAREL MANUFACTURING</h2>' +
+            '<p style="margin: 4px 0 0; font-size: 12px; color: #a8a69e;">New Website Contact Inquiry</p>' +
+          '</div>' +
+          '<div style="padding: 24px; background-color: #faf9f6;">' +
+            '<table style="width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.6;">' +
+              '<tr><td style="padding: 6px 0; color: #666666; width: 150px; font-size: 12px;">TIME</td><td style="padding: 6px 0; color: #111111;">' + timestamp + '</td></tr>' +
+              '<tr><td style="padding: 6px 0; color: #666666; font-size: 12px;">NAME</td><td style="padding: 6px 0; color: #111111; font-weight: 600;">' + (p.name || 'N/A') + '</td></tr>' +
+              '<tr><td style="padding: 6px 0; color: #666666; font-size: 12px;">COMPANY / BRAND</td><td style="padding: 6px 0; color: #111111; font-weight: 600;">' + (p.company || 'N/A') + '</td></tr>' +
+              '<tr><td style="padding: 6px 0; color: #666666; font-size: 12px;">EMAIL ADDRESS</td><td style="padding: 6px 0; color: #111111;"><a href="mailto:' + (p.email || '') + '" style="color: #a93435; text-decoration: none;">' + (p.email || 'N/A') + '</a></td></tr>' +
+              '<tr><td style="padding: 6px 0; color: #666666; font-size: 12px;">PHONE NUMBER</td><td style="padding: 6px 0; color: #111111;">' + (p.phone ? '<a href="tel:' + p.phone + '" style="color: #111111; text-decoration: none;">' + p.phone + '</a>' : 'Not provided') + '</td></tr>' +
+              '<tr><td style="padding: 6px 0; color: #666666; font-size: 12px;">LOCATION / CITY</td><td style="padding: 6px 0; color: #111111;">' + (p.location || 'Not provided') + '</td></tr>' +
+              '<tr><td style="padding: 6px 0; color: #666666; font-size: 12px;">GST NUMBER</td><td style="padding: 6px 0; color: #111111;">' + (p.gst || 'Not provided') + '</td></tr>' +
+              '<tr><td style="padding: 6px 0; color: #666666; font-size: 12px;">LOOKING TO MAKE</td><td style="padding: 6px 0; color: #a93435; font-weight: 600;">' + (p.manufacture || 'Not specified') + '</td></tr>' +
+              '<tr><td style="padding: 8px 0 0; color: #666666; font-size: 12px; vertical-align: top;">PROJECT DETAILS</td><td style="padding: 8px 0 0; color: #111111; white-space: pre-wrap;">' + (p.message || 'None provided') + '</td></tr>' +
+            '</table>' +
+          '</div>' +
+          '<div style="padding: 12px 24px; background-color: #f0ede6; font-size: 11px; color: #777777; border-top: 1px solid #e5e5e5;">' +
+            '✓ Saved to Google Sheet • You can click "Reply" to email this customer directly.' +
+          '</div>' +
+        '</div>';
+
+      MailApp.sendEmail({
+        to: recipient,
+        subject: subject,
+        htmlBody: htmlBody,
+        replyTo: p.email || undefined
+      });
+    } catch (mailErr) {
+      console.error('Notification email could not be sent: ' + mailErr.toString());
+    }
+
     return ContentService.createTextOutput(JSON.stringify({
       status: 'success',
-      message: 'Inquiry saved successfully.'
+      message: 'Inquiry saved and notification sent successfully.'
     })).setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {

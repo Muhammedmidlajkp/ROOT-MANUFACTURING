@@ -86,44 +86,51 @@
 }
 
 /* --------------------------------------------------------------------------
-   EXTERNAL PHOTOGRAPHY — SWAP SLOTS
-   The three section backgrounds below are the only photographs referenced from
-   CSS. They are currently hotlinked from Unsplash. To move to ROOTS-owned
-   photography, drop the files into assets/images/ and change only these three
-   values — no layout, cropping or overlay rule needs to be touched.
-   See assets/README.md for the full external-image inventory.
+   SECTION PHOTOGRAPHY — SWAP SLOTS
+
+   The section backgrounds referenced from CSS. All are now SELF-HOSTED; no
+   stylesheet rule reaches a third-party origin any more. To move to
+   ROOTS-owned photography, drop the files into assets/images/editorial/ and
+   change only these values — no layout, cropping or overlay rule is touched.
+   See assets/README.md for the replacement priority.
+
+   --img-quality carries no photograph on purpose. The image that was here
+   showed two shirts wearing a legible "THE TIE BAR" neck label — another
+   company's retail product, at roughly a third of the frame, sitting directly
+   behind the ROOTS quality statement. That is not something to host locally;
+   it is something to stop publishing. Until ROOTS supplies a photograph of its
+   own inspection floor, the section keeps its full visual weight from a gradient
+   in the brand's own ink, and the copy over it is unchanged.
    -------------------------------------------------------------------------- */
 :root {
-  --img-story: url('../assets/images/roots-story-craftsmanship.webp');
-  --img-quality: url('https://images.unsplash.com/photo-1598032895397-b9472444bf93?auto=format&fit=crop&w=2400&q=90');
-  --img-closing: url('https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=2400&q=90');
+  --img-story: url('../assets/images/editorial/roots-story-craftsmanship.webp');
+  --img-closing: url('../assets/images/editorial/roots-closing-cta.webp');
+  --img-quality:
+    radial-gradient(120% 90% at 78% 18%, rgba(250, 249, 246, 0.10), transparent 62%),
+    linear-gradient(118deg, #0d0d0d 0%, #191919 46%, #101010 100%);
 }
 
-/* A CSS background has no srcset, so without these the 2400px files were the
-   only ones that existed: a 390px phone downloaded 645KB of desktop photograph
-   for two decorative, grayscaled, overlaid backgrounds (measured — 256.7KB +
-   389.2KB, AVIF, Chrome 152). Narrowing the request by viewport costs nothing
-   visually because both images are behind `filter: grayscale(1)` and a dark
-   gradient overlay, and neither carries any detail the reader needs.
+/* A CSS background has no srcset, so a single value would send every viewport
+   the desktop file. These two tiers narrow the request by width instead, which
+   costs nothing visually: the image sits behind `filter: grayscale(1)` and a
+   dark gradient overlay, and carries no detail the reader needs.
 
-   Measured totals for the pair, same negotiation:
-     w=2400&q=90  645KB   (>1400px)
-     w=1600&q=82  273KB   (≤1400px)
-     w=1200&q=80  136KB   (≤800px)
-   Only these two custom properties change; the sections themselves are
-   untouched, and swapping in ROOTS-owned photography still means editing one
-   value per tier. */
+   Local WebP, measured on disk:
+     roots-closing-cta.webp       2400w   220 KB   (>1400px)
+     roots-closing-cta-1600.webp  1600w   108 KB   (≤1400px)
+     roots-closing-cta-1200.webp  1200w    66 KB   (≤800px)
+   Only this one custom property changes per tier; the section itself is
+   untouched, and swapping in ROOTS-owned photography means editing one value
+   per tier. */
 @media (max-width: 1400px) {
   :root {
-    --img-quality: url('https://images.unsplash.com/photo-1598032895397-b9472444bf93?auto=format&fit=crop&w=1600&q=82');
-    --img-closing: url('https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1600&q=82');
+      --img-closing: url('../assets/images/editorial/roots-closing-cta-1600.webp');
   }
 }
 
 @media (max-width: 800px) {
   :root {
-    --img-quality: url('https://images.unsplash.com/photo-1598032895397-b9472444bf93?auto=format&fit=crop&w=1200&q=80');
-    --img-closing: url('https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80');
+      --img-closing: url('../assets/images/editorial/roots-closing-cta-1200.webp');
   }
 }
 
@@ -579,7 +586,7 @@ p {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background-image: url('../assets/images/roots-hero-craftsmanship.webp');
+  background-image: url('../assets/images/hero/roots-hero-craftsmanship.webp');
   background-size: cover;
   background-position: right center;
   filter: contrast(1.05) brightness(0.92);
@@ -1819,14 +1826,20 @@ p {
   gap: 24px;
 }
 
-.contact label {
+.contact label,
+.contact-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.contact label,
+.contact-field-label {
   font-size: 10px;
   letter-spacing: 0.16em;
   color: var(--roots-muted);
   font-weight: 500;
+  text-transform: uppercase;
 }
 
 .contact input,
@@ -1839,12 +1852,198 @@ p {
   resize: vertical;
   color: var(--roots-ink);
   font-size: 15px;
+  font-family: inherit;
   transition: border-color var(--trans-fast);
 }
 
 .contact input:focus,
 .contact textarea:focus {
   border-color: var(--roots-red-text);
+}
+
+/* ==========================================================================
+   LUXURY CUSTOM SELECT DROPDOWN
+   ========================================================================== */
+.custom-select {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  border-bottom: 1px solid var(--roots-line);
+  background: transparent;
+  padding: 8px 0;
+  color: var(--roots-muted);
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  outline: 0;
+  transition: border-color var(--trans-fast), color var(--trans-fast);
+}
+
+.custom-select-trigger:hover {
+  border-color: var(--roots-red-text);
+  color: var(--roots-ink);
+}
+
+.custom-select.is-open .custom-select-trigger {
+  border-color: var(--roots-red-text);
+  color: var(--roots-ink);
+}
+
+.custom-select-trigger[data-selected="true"] {
+  color: var(--roots-ink);
+  font-weight: 500;
+}
+
+.custom-select-value {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 12px;
+}
+
+.custom-select-arrow {
+  flex-shrink: 0;
+  color: var(--roots-muted);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color var(--trans-fast);
+}
+
+.custom-select.is-open .custom-select-arrow {
+  transform: rotate(180deg);
+  color: var(--roots-red-text);
+}
+
+/* Floating Luxury Dropdown Menu Panel */
+.custom-select-options {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 120;
+  background-color: #faf8f5;
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  border-radius: 4px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06);
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  max-height: 360px;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s;
+  overscroll-behavior: contain;
+}
+
+.custom-select.is-open .custom-select-options {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Individual Dropdown Item */
+.custom-select-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color var(--trans-fast), color var(--trans-fast);
+  color: var(--roots-ink);
+  position: relative;
+  user-select: none;
+}
+
+.custom-select-option:hover,
+.custom-select-option.is-focused {
+  background-color: rgba(169, 52, 53, 0.08);
+}
+
+.custom-select-option.is-selected {
+  background-color: rgba(169, 52, 53, 0.06);
+  border-left: 2px solid var(--roots-red);
+}
+
+.custom-select-option.is-placeholder {
+  opacity: 0.75;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.06);
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+}
+
+.custom-select-option .opt-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--roots-red);
+  background: rgba(169, 52, 53, 0.1);
+  padding: 3px 6px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.custom-select-option .opt-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.custom-select-option .opt-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--roots-ink);
+  line-height: 1.35;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.custom-select-option .opt-desc {
+  font-size: 11.5px;
+  color: var(--roots-muted);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.custom-select-option .opt-check {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--roots-red);
+  opacity: 0;
+  transition: opacity var(--trans-fast);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.custom-select-option.is-selected .opt-check {
+  opacity: 1;
+}
+
+/* Hidden native select for form data and Google Sheets */
+.sr-only-select {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 /* `outline: 0` on the base rule above is (0,1,1) — the same specificity as the
@@ -2140,7 +2339,7 @@ p {
   }
 
   .hero-bg {
-    background-image: url('../assets/images/roots-hero-craftsmanship-mobile.webp');
+    background-image: url('../assets/images/hero/roots-hero-craftsmanship-mobile.webp');
     background-position: 80% center;
   }
 
