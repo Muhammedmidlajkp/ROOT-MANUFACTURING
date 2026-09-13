@@ -805,14 +805,11 @@
 
       clearInvalid();
 
-      // Check all required important fields
+      // Only Name, Email, Phone, and Manufacture category are compulsory
       const errors = [];
 
       if (!nameInput?.value.trim()) {
         errors.push({ el: nameInput, msg: 'Please enter your full name.' });
-      }
-      if (!companyInput?.value.trim()) {
-        errors.push({ el: companyInput, msg: 'Please enter your brand or company name.' });
       }
       if (!emailInput?.value.trim()) {
         errors.push({ el: emailInput, msg: 'Please enter your email address.' });
@@ -824,16 +821,8 @@
       } else if (phoneInput.value.trim().replace(/\D/g, '').length < 7) {
         errors.push({ el: phoneInput, msg: 'Please enter a valid phone number with at least 7 digits.' });
       }
-      if (!locationInput?.value.trim()) {
-        errors.push({ el: locationInput, msg: 'Please enter your location or city.' });
-      }
       if (!manufactureInput?.value.trim()) {
         errors.push({ el: customSelectTrigger || manufactureInput, msg: 'Please select what you are looking to manufacture from the dropdown.' });
-      }
-      if (!messageInput?.value.trim()) {
-        errors.push({ el: messageInput, msg: 'Please provide details about your project, order quantities, or fabrics.' });
-      } else if (messageInput.value.trim().length < 5) {
-        errors.push({ el: messageInput, msg: 'Please provide a little more detail in your project description (at least 5 characters).' });
       }
 
       if (errors.length > 0) {
