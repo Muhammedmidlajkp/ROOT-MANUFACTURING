@@ -226,6 +226,37 @@
   outline-offset: 3px;
 }
 
+.ms-btn:disabled,
+.ms-btn[disabled],
+.ms-btn[aria-busy="true"] {
+  opacity: 0.58;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+.ms-btn.is-submitted {
+  background-color: #2b7a4b !important;
+  border-color: #2b7a4b !important;
+  color: #ffffff !important;
+  opacity: 0.95;
+  cursor: default !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+.ms-btn-spinner {
+  display: inline-block;
+  animation: msSpin 1s linear infinite;
+  font-size: 13px;
+  line-height: 1;
+}
+
+@keyframes msSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* --------------------------------------------------------------------------
    ENTRANCE — CSS only, so the page is never blank if scripts fail.
    Elements have no `opacity: 0` base state; `both` supplies the end frame.

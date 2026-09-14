@@ -169,8 +169,9 @@
   var clearBtn = document.getElementById('ms-clear');
   var editBtn = document.getElementById('ms-edit');
   var submitBtn = document.getElementById('ms-submit');
-
   var currentUnit = 'cm';
+  var isSubmitting = false;
+  var originalSubmitBtnHtml = submitBtn ? submitBtn.innerHTML : 'SUBMIT SPECIFICATIONS <span aria-hidden="true">→</span>';
 
   /* =======================================================================
      1. BUILD THE MEASUREMENT FIELDS FROM THE SPEC
@@ -752,14 +753,6 @@
         'The specification is only delivered once you send it.', false);
     });
 
-    var jsonBtn = document.createElement('button');
-    jsonBtn.type = 'button';
-    jsonBtn.className = 'ms-btn ms-btn--quiet';
-    jsonBtn.textContent = 'DOWNLOAD JSON';
-    jsonBtn.addEventListener('click', function () {
-      download(p.reference + '.json', JSON.stringify(p, null, 2), 'application/json');
-    });
-
     var txtBtn = document.createElement('button');
     txtBtn.type = 'button';
     txtBtn.className = 'ms-btn ms-btn--quiet';
@@ -786,7 +779,6 @@
     });
 
     actions.appendChild(mailBtn);
-    actions.appendChild(jsonBtn);
     actions.appendChild(txtBtn);
     actions.appendChild(copyBtn);
     resultBody.appendChild(actions);
@@ -820,7 +812,16 @@
       return;
     }
 
-    submitBtn.disabled = true;
+    if (isSubmitting) return;
+    isSubmitting = true;
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.setAttribute('aria-busy', 'true');
+      submitBtn.innerHTML = 'SAVING SPECIFICATIONS… <span class="ms-btn-spinner" aria-hidden="true">⏳</span>';
+    }
+    if (editBtn) editBtn.disabled = true;
+
     setStatus(submitStatus, 'Saving specifications to Google Sheets…', false);
 
     // Explicitly flag as measurement submission
@@ -852,6 +853,14 @@
       reveal(resultSection);
       setStatus(submitStatus, 'Specification saved to Google Sheet successfully.', false);
 
+      // Permanently lock submit button in completed state so it cannot be clicked again
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.removeAttribute('aria-busy');
+        submitBtn.classList.add('is-submitted');
+        submitBtn.innerHTML = 'SPECIFICATIONS SUBMITTED <span aria-hidden="true">✓</span>';
+      }
+
       // Launch Luxury Animated Popup Modal for Measurements
       showMeasurementSuccessModal({
         eyebrow: 'TECH-PACK CONFIRMED',
@@ -865,12 +874,18 @@
         ctaText: 'REVIEW TECH-PACK'
       });
     }).catch(function (err) {
+      isSubmitting = false;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.removeAttribute('aria-busy');
+        submitBtn.innerHTML = originalSubmitBtnHtml;
+      }
+      if (editBtn) editBtn.disabled = false;
+
       setStatus(submitStatus, 'Could not save directly to Google Sheets (' + err.message +
         '). Please use the delivery options below to share your specification.', true);
       renderDeliveryState(p);
       reveal(resultSection);
-    }).finally(function () {
-      submitBtn.disabled = false;
     });
   }
 
@@ -1013,11 +1028,13 @@
 
   if (submitBtn) {
     submitBtn.addEventListener('click', function () {
+      if (isSubmitting || submitBtn.disabled) return;
       var errors = validate();
       if (errors.length) {
         reviewSection.hidden = true;
         setStatus(formStatus, 'The specification changed and is no longer valid. Please correct the marked fields.', true);
         errors[0].focus();
+        errors[0].scrollIntoView({ block: 'center', behavior: 'smooth' });
         return;
       }
       submitSpecification(buildPayload());
@@ -1026,6 +1043,15 @@
 
   if (clearBtn) {
     clearBtn.addEventListener('click', function () {
+      if (isSubmitting) return;
+      isSubmitting = false;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.removeAttribute('aria-busy');
+        submitBtn.classList.remove('is-submitted');
+        submitBtn.innerHTML = originalSubmitBtnHtml;
+      }
+      if (editBtn) editBtn.disabled = false;
       form.reset();
       currentUnit = 'cm';
       canonicalCm = {};

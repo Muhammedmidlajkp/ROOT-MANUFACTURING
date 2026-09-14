@@ -131,7 +131,7 @@ function doPost(e) {
 
       // Email Notification for Measurements (Warm Editorial Luxury Style)
       try {
-        var recipient = 'midlaj2636@gmail.com';
+        var recipient = 'rootsbusinessconnect@gmail.com';
         var subject = 'New ROOTS Measurement Spec: ' + (clientCompany !== 'N/A' ? clientCompany : clientName) + ' (' + (p.garmentType || 'Garment') + ') [' + ref + ']';
 
         var msHtmlBody =
@@ -299,10 +299,10 @@ function doPost(e) {
 
     inqSheet.appendRow(row);
 
-    // Send instant email notification to midlaj2636@gmail.com with ROOTS Logo
+    // Send instant email notification to rootsbusinessconnect@gmail.com with ROOTS Logo
     // Warm Editorial Luxury Style (No hard black)
     try {
-      var recipient = 'midlaj2636@gmail.com';
+      var recipient = 'rootsbusinessconnect@gmail.com';
       var subject = 'New ROOTS Manufacturing Inquiry: ' + (p.company || p.name || 'Website Lead');
 
       var inqHtmlBody =

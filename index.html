@@ -425,19 +425,35 @@
            Without it, tabbing off the selected stage button skipped the stage
            copy entirely and landed in the next section. -->
       <figure class="process-visual" id="process-panel" role="tabpanel" aria-labelledby="tab-01" tabindex="0">
+        <!-- Progress track across stage duration -->
+        <div class="process-progress-track" aria-hidden="true">
+          <div class="process-progress-fill" id="process-progress-fill"></div>
+        </div>
+
+        <!-- Live Technical Stage Badge -->
+        <div class="process-badge" aria-hidden="true">
+          <span class="process-badge-dot"></span>
+          <span class="process-badge-text">STAGE <span id="process-badge-num">01</span> / 09</span>
+        </div>
+
+        <!-- Floating Stage Navigation Controls -->
+        <button type="button" class="process-nav-btn process-nav-prev" id="process-prev" aria-label="Previous manufacturing stage">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+            <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button type="button" class="process-nav-btn process-nav-next" id="process-next" aria-label="Next manufacturing stage">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+            <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
         <div class="process-img-wrap">
           <img class="process-img is-active" src="assets/images/process/roots-process-01-order-1200.webp"
               srcset="assets/images/process/roots-process-01-order-600.webp 600w, assets/images/process/roots-process-01-order-1200.webp 1200w, assets/images/process/roots-process-01-order.webp 1600w"
               sizes="(max-width: 800px) 88vw, 84vw"
               width="1600" height="900"
             alt="Two people reviewing handwritten notes beside a laptop" loading="lazy" decoding="async">
-          <!-- The second half of the crossfade. main.js assigns its src on the
-               first stage change; until then it needs one of its own, because
-               <img> requires src and an element without it is invalid HTML that
-               reports naturalWidth 0 for the life of the page. Pointing it at
-               the stage-01 file costs nothing — the active layer has already
-               fetched it, so this is a cache hit — and it is opacity 0 and
-               aria-hidden, so it is never seen or announced. -->
           <img class="process-img is-incoming" src="assets/images/process/roots-process-01-order-1200.webp"
             aria-hidden="true" alt="" loading="lazy" decoding="async">
         </div>

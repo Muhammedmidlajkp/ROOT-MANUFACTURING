@@ -323,12 +323,120 @@
 
     let captionTimer = 0;
 
+    const prevBtn = visualContainer.querySelector('#process-prev');
+    const nextBtn = visualContainer.querySelector('#process-next');
+    const progressFill = visualContainer.querySelector('#process-progress-fill');
+    const badgeNum = visualContainer.querySelector('#process-badge-num');
+
+    let autoplayTimer = null;
+    let isHovered = false;
+    let isSectionInView = false;
+    const STAGE_DURATION = 5500; // 5.5 seconds per stage
+
+    const resetProgressBar = () => {
+      if (!progressFill) return;
+      progressFill.style.transition = 'none';
+      progressFill.style.width = '0%';
+      // Force reflow
+      void progressFill.offsetWidth;
+      if (!isHovered && isSectionInView && !prefersReduced()) {
+        progressFill.style.transition = `width ${STAGE_DURATION}ms linear`;
+        progressFill.style.width = '100%';
+      }
+    };
+
+    const stopAutoplay = () => {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+      if (progressFill) {
+        const computedWidth = window.getComputedStyle(progressFill).width;
+        progressFill.style.transition = 'none';
+        progressFill.style.width = computedWidth;
+      }
+    };
+
+    const startAutoplay = () => {
+      stopAutoplay();
+      if (prefersReduced() || isHovered || !isSectionInView) return;
+      resetProgressBar();
+      autoplayTimer = setInterval(() => {
+        if (!isHovered && isSectionInView && !prefersReduced()) {
+          const nextIndex = (currentIndex + 1) % processStages.length;
+          activateStage(nextIndex, false);
+        }
+      }, STAGE_DURATION);
+    };
+
+    // IntersectionObserver to only animate and auto-advance when section is visible
+    const processSection = document.querySelector('.process');
+    if (processSection && 'IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          isSectionInView = entry.isIntersecting;
+          if (isSectionInView) {
+            startAutoplay();
+          } else {
+            stopAutoplay();
+          }
+        });
+      }, { threshold: 0.2 });
+      observer.observe(processSection);
+    }
+
+    // Pause on hover or focus for user comfort
+    const handlePause = () => {
+      isHovered = true;
+      stopAutoplay();
+    };
+    const handleResume = () => {
+      isHovered = false;
+      if (isSectionInView) startAutoplay();
+    };
+
+    visualContainer.addEventListener('mouseenter', handlePause);
+    visualContainer.addEventListener('mouseleave', handleResume);
+    visualContainer.addEventListener('focusin', handlePause);
+    visualContainer.addEventListener('focusout', handleResume);
+
+    if (timeline) {
+      timeline.addEventListener('mouseenter', handlePause);
+      timeline.addEventListener('mouseleave', handleResume);
+    }
+
+    // Previous and Next button click listeners
+    if (prevBtn) {
+      prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handlePause();
+        const prevIndex = (currentIndex - 1 + processStages.length) % processStages.length;
+        activateStage(prevIndex, true);
+        setTimeout(handleResume, 3000);
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handlePause();
+        const nextIndex = (currentIndex + 1) % processStages.length;
+        activateStage(nextIndex, true);
+        setTimeout(handleResume, 3000);
+      });
+    }
+
     const activateStage = (index, userInitiated) => {
       if (index === currentIndex && !userInitiated) return;
       const stage = processStages[index];
       if (!stage) return;
 
       currentIndex = index;
+
+      // Update live badge
+      if (badgeNum) {
+        badgeNum.textContent = String(index + 1).padStart(2, '0');
+      }
 
       buttons.forEach((b, i) => {
         const isSelected = i === index;
@@ -338,16 +446,15 @@
         if (isSelected) {
           updateSlider(b);
           if (userInitiated) {
-            // Same reason as centreInRail's comment: scrollIntoView would be
-            // free to move the document as well as the rail. A keyboard user
-            // arrowing along the tablist should never lose their scroll
-            // position to a control that is already on screen.
             centreInRail(b, true);
           }
         }
       });
 
       visualContainer.setAttribute('aria-labelledby', buttons[index].id);
+
+      // Reset progress animation
+      resetProgressBar();
 
       if (prefersReduced()) {
         imgActive.srcset = processSrcset(stage.image);
@@ -390,15 +497,6 @@
         imgActive.alt = stage.alt;
       }
 
-      // Editorial micro-stagger for caption text.
-      //
-      // Cleared first: each call used to queue its own 140 ms timer with no
-      // handle kept, so swiping or arrowing through stages faster than that
-      // left several in flight at once. They fire in the order they were
-      // queued, not the order the user chose, so the caption could settle on a
-      // stage the visitor had already moved past — and the last one to land
-      // also cleared `is-transitioning`, ending the fade for a stage that was
-      // no longer showing.
       clearTimeout(captionTimer);
       captionTimer = setTimeout(() => {
         if (num) num.textContent = String(index + 1).padStart(2, '0');
@@ -410,7 +508,11 @@
 
     // Keyboard arrow navigation
     buttons.forEach((btn, index) => {
-      btn.addEventListener('click', () => activateStage(index, true));
+      btn.addEventListener('click', () => {
+        handlePause();
+        activateStage(index, true);
+        setTimeout(handleResume, 3000);
+      });
 
       btn.addEventListener('keydown', (e) => {
         let newIndex = index;
@@ -428,7 +530,9 @@
 
         e.preventDefault();
         buttons[newIndex].focus();
+        handlePause();
         activateStage(newIndex, true);
+        setTimeout(handleResume, 3000);
       });
     });
 
@@ -442,6 +546,7 @@
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
       isTrackingTouch = true;
+      handlePause();
     }, { passive: true });
 
     visualContainer.addEventListener('touchend', (e) => {
@@ -463,6 +568,7 @@
           activateStage(prevIndex, true);
         }
       }
+      setTimeout(handleResume, 3000);
     }, { passive: true });
   }
 
